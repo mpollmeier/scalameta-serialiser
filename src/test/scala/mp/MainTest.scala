@@ -11,7 +11,3 @@ class MainTest extends WordSpec with Matchers {
   }
 
 }
-
-@Main object MyMain {
-  println("here i am")
-}
