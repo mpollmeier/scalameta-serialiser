@@ -2,10 +2,10 @@ package mp
 
 import org.scalatest._
 
-class SerialiserTest extends WordSpec with Matchers {
+class MainTest extends WordSpec with Matchers {
 
-  "serialiser" should {
-    "blub" in {
+  "Main" should {
+    "have a banana" in {
       MyMain.banana(Array.empty)
     }
   }
