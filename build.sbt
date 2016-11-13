@@ -4,7 +4,7 @@ version := "1.0.0-SNAPSHOT"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "org.scalameta" %% "scalameta" % "1.2.0",
+  "org.scalameta" %% "scalameta" % "1.3.0",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
