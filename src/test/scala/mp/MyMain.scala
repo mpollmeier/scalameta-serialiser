@@ -1,10 +1,9 @@
 package mp
 
 @Main object MyMain {
-  println("here i am")
-  // SillyGl
+  SillyGlobalState.bananaCount += 1
 }
 
 object SillyGlobalState {
-  var x = 0
+  var bananaCount = 0
 }
