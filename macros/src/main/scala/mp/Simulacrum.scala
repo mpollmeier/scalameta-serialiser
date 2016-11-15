@@ -102,9 +102,9 @@ class typeclass extends StaticAnnotation {
        }
       """
 
-    println("----- result is")
-    println(res)
-    println("-----")
+    // println("----- result is")
+    // println(res)
+    // println("-----")
 
     res
   }

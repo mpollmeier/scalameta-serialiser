@@ -8,7 +8,7 @@ class SemigroupTest extends WordSpec with Matchers {
     "append" in {
       val sg = new MySemigroup
       sg.append1(1, 2) shouldBe 3
+
     }
   }
-
 }
