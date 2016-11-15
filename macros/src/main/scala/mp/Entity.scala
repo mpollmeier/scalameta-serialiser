@@ -1,14 +1,24 @@
 package mp
 
 import scala.annotation.compileTimeOnly
+import scala.annotation.StaticAnnotation
 import scala.meta._
 
-@compileTimeOnly("@mp.Entity not expanded")
-class Entity extends scala.annotation.StaticAnnotation {
-  // import autocomplete._
-  // inline def apply(defn: Any): Any = meta {
-  //   val q"object $name { ..$stats }" = defn
-  //   val main = q"def banana(args: Array[String]): Unit = { ..$stats }"
-  //   q"object $name { $main }"
-  // }
+@compileTimeOnly("@mp.Serialise not expanded")
+class entity extends StaticAnnotation {
+  inline def apply(defn: Any): Any = meta {
+    val q"..$mods class $tname[..$tparams] (...$paramss) extends $template" = defn
+    val res = q"""class A(i: Int)"""
+
+    println("XXXXXXXXXXXXXXXXX")
+    println(defn)
+    println(s"mods=$mods")
+    println(s"tname=$tname")
+    println(s"paramss=$paramss")
+    println(s"tparams=$tparams")
+    println(s"template=$template")
+    println("XXXXXXXXXXXXXXXXX")
+    println(res)
+    res
+  }
 }
