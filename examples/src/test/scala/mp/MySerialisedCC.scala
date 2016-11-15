@@ -1,3 +1,3 @@
 package mp
 
-@serialise final class A(j: Int) {}
+@serialise case class A(j: Int) {}
