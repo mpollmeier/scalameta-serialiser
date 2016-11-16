@@ -7,7 +7,7 @@ import scala.meta._
 @compileTimeOnly("@mp.Serialise not expanded")
 class entity extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
-    val q"..$mods class $tname[..$tparams] (...$paramss) extends $template" = defn
+    val q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" = defn
     val res = q"""class A(i: Int)"""
 
     println("XXXXXXXXXXXXXXXXX")
@@ -17,6 +17,7 @@ class entity extends StaticAnnotation {
     println(s"paramss=$paramss")
     println(s"tparams=$tparams")
     println(s"template=$template")
+    println(s"ctorMods=$ctorMods")
     println("XXXXXXXXXXXXXXXXX")
     println(res)
     res
