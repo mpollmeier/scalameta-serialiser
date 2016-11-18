@@ -1,3 +1,4 @@
 package mp
 
-@entity case class A(j: Int)
+@entity
+case class MyEntity(i: Int, s: String)
