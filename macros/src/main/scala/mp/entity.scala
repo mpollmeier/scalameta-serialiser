@@ -19,19 +19,14 @@ class entity extends StaticAnnotation {
     // TODO low prio: support multiple constructor params lists
     val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
 
-    // def ctorArgs(): Seq[Term] = ctorParamsFirst.map { param =>  // TODO: drop this line
-    def ctorArgs(values: Map[String, Any]): Seq[Term] = ctorParamsFirst.map { param =>
+    def ctorArgs(valuesName: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
       val nameTerm = Term.Name(param.name.value)
-      val tpe: Type = param.decltpe.get match { // TODO:don't do option.get
-        case tpe: Type$Name$TypeNameImpl => tpe  // TODO: understand where TypeNameImpl is coming from and adapt
-      }
-      q"""
-        $nameTerm = values(${param.name.value}).asInstanceOf[$tpe]
-      """
-      // $nameTerm = "blub".asInstanceOf[$tpe]
+      val tpe: Type = param.decltpe.get.asInstanceOf[Type.Name] // TODO: don't do option.get, don't cast
+      q""" $nameTerm = $valuesName(${param.name.value}).asInstanceOf[$tpe] """
     }
 
     val typeTermName = Term.Name(tname.value)
+    val fromMapCtorValuesName: Term.Name = q"values"
     val res = q"""
       ..$mods class $tname[..$tparams](...$paramss) {
         def toMap(): Map[String, Any] = Map[String, Any](..$toMapContents)
@@ -39,13 +34,10 @@ class entity extends StaticAnnotation {
 
       object $typeTermName {
         def fromMap(values: Map[String, Any]): $tname = {
-          ${typeTermName}(..${ctorArgs(Map.empty[String, Any])}) // TODO: pass in the actual map reference
+          ${typeTermName}(..${ctorArgs(fromMapCtorValuesName)})
         }
       }
     """
-    // ${typeTermName}(..$ctorArgs(values))
-    // ${typeTermName}(i = 42, s = "test")
-    // def serialise(it: $tname): Map[String, Any] = Map[String, Any](..${keyValues(it)})
 
     println(res)
     res
