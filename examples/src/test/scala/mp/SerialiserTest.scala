@@ -13,7 +13,17 @@ class SerialiserTest extends WordSpec with Matchers {
       keyValues should contain ("s" -> myEntity.s)
     }
 
-    // TODO: "deserialise from Map" in {}
+    "deserialise from Map" in {
+      val myEntity = MyEntity.fromMap(
+        Map(
+          "i" -> 42,
+          "s" -> "something"
+        )
+      )
+
+      myEntity.i shouldBe 42
+      myEntity.s shouldBe "something"
+    }
   }
 
 }
