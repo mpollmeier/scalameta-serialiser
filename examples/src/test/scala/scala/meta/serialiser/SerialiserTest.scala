@@ -1,4 +1,4 @@
-package mp
+package scala.meta.serialiser
 
 import org.scalatest._
 

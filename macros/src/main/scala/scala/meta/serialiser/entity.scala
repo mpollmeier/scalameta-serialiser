@@ -1,4 +1,4 @@
-package mp
+package scala.meta.serialiser
 
 import scala.annotation.compileTimeOnly
 import scala.annotation.StaticAnnotation
