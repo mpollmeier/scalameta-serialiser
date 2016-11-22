@@ -2,7 +2,12 @@ package scala.meta.serialiser
 
 import org.scalatest._
 
+object TestEntities {
+  @entity case class MyEntity(i: Int, s: String)
+}
+
 class SerialiserTest extends WordSpec with Matchers {
+  import TestEntities._
 
   "Serialiser" should {
     "serialise to Map" in {

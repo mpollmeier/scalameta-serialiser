@@ -1,2 +1,2 @@
 # sbt
-~;clean;examples/test:compile
+~;clean;examples/test
