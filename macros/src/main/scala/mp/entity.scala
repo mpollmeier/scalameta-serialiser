@@ -11,9 +11,9 @@ class entity extends StaticAnnotation {
     val q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" = defn
 
     val paramssFlat: Seq[Term.Param] = paramss.flatten
-    val toMapContents: Seq[Term] = paramssFlat.map { param =>
+    def toMapContents(entityName: Term.Name): Seq[Term] = paramssFlat.map { param =>
       val memberName = Term.Name(param.name.value)
-      q"${param.name.value} -> $memberName"
+      q"${param.name.value} -> $entityName.$memberName"
     }
 
     // TODO low prio: support multiple constructor params lists
@@ -27,26 +27,21 @@ class entity extends StaticAnnotation {
 
     val typeTermName = Term.Name(tname.value)
     val fromMapCtorValuesName: Term.Name = q"values"
+    val toMapEntityName: Term.Name = q"entity"
     val res = q"""
       ..$mods class $tname[..$tparams](...$paramss) {
-        def toMap(): Map[String, Any] = Map[String, Any](..$toMapContents)
       }
 
       object $typeTermName {
-        def fromMap(values: Map[String, Any]): $tname = {
+        def fromMap(values: Map[String, Any]): $tname =
           ${typeTermName}(..${ctorArgs(fromMapCtorValuesName)})
-        }
+
+        def toMap($toMapEntityName: $tname): Map[String, Any] =
+          Map[String, Any](..${toMapContents(toMapEntityName)})
       }
     """
 
     println(res)
     res
   }
-
-  // def keyValues(it: Int): Int = ???//paramssFlat.map { param =>
-                                   //   val memberName = Term.Name(param.name.value)
-                                   //   q"${param.name.value} -> $memberName"
-                                   // }
-
-  // def bla(i: Int): Term = q"1 + $i"
 }
