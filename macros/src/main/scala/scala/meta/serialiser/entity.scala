@@ -41,8 +41,7 @@ class entity extends StaticAnnotation {
     }
 
     val res = q"""
-      ..$mods class $tName[..$tParams](...$paramss) {
-      }
+      ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
         def toMap[..$tParams](${ToMap.entityName}: ${Option(tCompleteType)}): Map[String, Any] =
