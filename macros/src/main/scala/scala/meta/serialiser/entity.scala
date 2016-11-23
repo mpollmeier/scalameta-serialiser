@@ -5,11 +5,19 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 
-@compileTimeOnly("@mp.entity not expanded")
+@compileTimeOnly("@scala.meta.serialiser.entity not expanded")
 class entity extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
-    val q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" = defn
-    val typeTermName = Term.Name(tname.value)
+    val q"..$mods class $tName[..$tParams] ..$ctorMods (...$paramss) extends $template" = defn
+    val typeTermName = Term.Name(tName.value)
+
+    val tCompleteType: Type = {
+      val tParamTypes: Seq[Type] = tParams map Helpers.toType
+      val tCompleteTerm: Term =
+        if (tParamTypes.isEmpty) q"$typeTermName"
+        else q"$typeTermName[..$tParamTypes]"
+      Helpers.toType(tCompleteTerm)
+    }
 
     object ToMap {
       val entityName: Term.Name = q"entity"
@@ -30,17 +38,17 @@ class entity extends StaticAnnotation {
         val tpe: Type = param.decltpe.get.asInstanceOf[Type.Name] // TODO: don't do option.get, don't cast
         q""" $nameTerm = $valuesName(${param.name.value}).asInstanceOf[$tpe] """
       }
-
     }
+
     val res = q"""
-      ..$mods class $tname[..$tparams](...$paramss) {
+      ..$mods class $tName[..$tParams](...$paramss) {
       }
 
       object $typeTermName {
-        def toMap(${ToMap.entityName}: $tname): Map[String, Any] =
+        def toMap[..$tParams](${ToMap.entityName}: ${Option(tCompleteType)}): Map[String, Any] =
           Map[String, Any](..${ToMap.keyValues(ToMap.entityName)})
 
-        def fromMap(values: Map[String, Any]): $tname =
+        def fromMap[..$tParams](values: Map[String, Any]): ${Option(tCompleteType)} =
           ${typeTermName}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
       }
     """
@@ -48,4 +56,13 @@ class entity extends StaticAnnotation {
     // println(res)
     res
   }
+}
+
+object Helpers {
+  def toType(term: Term): Type = term match {
+    case name: Term.Name => Type.Name(name.value)
+    case applyType: Term.ApplyType => Type.Apply(toType(applyType.fun), applyType.targs)
+  }
+
+  def toType(tparam: Type.Param): Type = Type.Name(tparam.name.value)
 }
