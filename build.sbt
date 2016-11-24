@@ -16,3 +16,23 @@ lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
   .dependsOn(scalameta_serialiser)
 
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+publishTo := {
+  val sonatype = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at sonatype + "content/repositories/snapshots")
+  else
+    Some("releases" at sonatype + "service/local/staging/deploy/maven2")
+}
+pomExtra :=
+  <scm>
+    <url>git@github.com:mpollmeier/scalameta-serialiser.git</url>
+    <connection>scm:git:git@github.com:mpollmeier/scalameta-serialiser.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>mpollmeier</id>
+      <name>Michael Pollmeier</name>
+      <url>http://www.michaelpollmeier.com</url>
+    </developer>
+  </developers>
