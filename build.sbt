@@ -1,8 +1,6 @@
-name := "scalameta-examples"
-version := "1.0.0-SNAPSHOT"
-scalaVersion := "2.11.8"
-
-val commonSettings = Seq(
+lazy val commonSettings = Seq(
+  organization := "com.michaelpollmeier.scalameta",
+  version := "1.0.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.3.0",
@@ -12,11 +10,13 @@ val commonSettings = Seq(
   scalacOptions += "-Xplugin-require:macroparadise"
 )
 
-lazy val root = project.in(file(".")).aggregate(examples, macros)
+lazy val root = project.in(file("."))
+  .settings(commonSettings: _*)
+  .aggregate(serialiser, examples)
 
 lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
-  .dependsOn(macros)
+  .dependsOn(serialiser)
 
-lazy val macros = project.in(file("macros"))
+lazy val serialiser = project.in(file("serialiser"))
   .settings(commonSettings: _*)
