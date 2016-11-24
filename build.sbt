@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  organization := "com.michaelpollmeier.scalameta",
+  organization := "com.michaelpollmeier",
   version := "1.0.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   libraryDependencies ++= Seq(
@@ -10,13 +10,10 @@ lazy val commonSettings = Seq(
   scalacOptions += "-Xplugin-require:macroparadise"
 )
 
-lazy val root = project.in(file("."))
+lazy val scalameta_serialiser = project.in(file("."))
   .settings(commonSettings: _*)
-  .aggregate(serialiser, examples)
 
 lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
-  .dependsOn(serialiser)
+  .dependsOn(scalameta_serialiser)
 
-lazy val serialiser = project.in(file("serialiser"))
-  .settings(commonSettings: _*)
