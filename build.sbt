@@ -6,8 +6,7 @@ lazy val commonSettings = Seq(
     "org.scalameta" %% "scalameta" % "1.3.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full),
-  scalacOptions += "-Xplugin-require:macroparadise"
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
 )
 
 lazy val scalameta_serialiser = project.in(file("."))
