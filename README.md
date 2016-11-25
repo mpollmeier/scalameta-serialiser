@@ -1,17 +1,26 @@
 [![Build Status](https://secure.travis-ci.org/mpollmeier/scalameta-serialiser.png?branch=master)](http://travis-ci.org/mpollmeier/scalameta-serialiser)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11)
 
-# scalameta-serialiser
+# Usage
 
+## @mappable
+Generates a companion object for your case class with two functions: 
 
-  <!-- * usage -->
-  <!--   * need macro paradise, see in branch of gremlin examples -->
-  <!-- * check: maven badge is working? -->
-  <!-- * limitations -->
-  <!--   * will fail if there is an existing companion object -->
-  <!--   * no ide support (at least not ensime) -->
-  <!--   * only exists for 2.11 so far -->
-  <!--     * change scalav back to 2.12 when done (and scala.meta is available) -->
+* `def toMap(myInstance: MyCaseClass): Map[String, Any]` 
+* `def fromMap(map: [String, Any]): Option[MyCaseClass]`
 
-## sbt command to compile and test this project
+For details check out [MappableTest.scala](blob/master/examples/src/test/scala/scala/meta/serialiser/SerialiserTest.scala)
+
+## current limitations
+* will fail if there is an existing companion object
+
+# Setup with sbt
+Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.11.8)
+
+```
+libraryDependencies += "com.michaelpollmeier" %% "scalameta_serialiser" % "0.0.2"
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
+```
+
+# sbt command to compile and test this project
 ~;clean;examples/test

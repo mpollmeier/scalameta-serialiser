@@ -8,7 +8,7 @@ object TestEntities {
   @mappable case class WithBody(i: Int) { def banana: Int = i }
 }
 
-class SerialiserTest extends WordSpec with Matchers {
+class MappableTest extends WordSpec with Matchers {
   import TestEntities._
 
   "simple case class" should {
