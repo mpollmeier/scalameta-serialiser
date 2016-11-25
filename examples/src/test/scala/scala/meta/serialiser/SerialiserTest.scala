@@ -3,9 +3,9 @@ package scala.meta.serialiser
 import org.scalatest._
 
 object TestEntities {
-  @entity case class SimpleCaseClass(i: Int, s: String)
-  @entity case class WithTypeParam[N <: Number](n: Number)
-  @entity case class WithBody(i: Int) { def banana: Int = i }
+  @mappable case class SimpleCaseClass(i: Int, s: String)
+  @mappable case class WithTypeParam[N <: Number](n: Number)
+  @mappable case class WithBody(i: Int) { def banana: Int = i }
 }
 
 class SerialiserTest extends WordSpec with Matchers {

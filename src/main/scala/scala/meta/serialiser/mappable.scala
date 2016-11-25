@@ -5,8 +5,8 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 
-@compileTimeOnly("@scala.meta.serialiser.entity not expanded")
-class entity extends StaticAnnotation {
+@compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
+class mappable extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
     val q"..$mods class $tName[..$tParams] ..$ctorMods (...$paramss) extends $template" = defn
     val typeTermName = Term.Name(tName.value)
@@ -20,11 +20,11 @@ class entity extends StaticAnnotation {
     }
 
     object ToMap {
-      val entityName: Term.Name = q"entity"
+      val mappableName: Term.Name = q"mappable"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
-      def keyValues(entityName: Term.Name): Seq[Term] = paramssFlat.map { param =>
+      def keyValues(mappableName: Term.Name): Seq[Term] = paramssFlat.map { param =>
         val memberName = Term.Name(param.name.value)
-        q"${param.name.value} -> $entityName.$memberName"
+        q"${param.name.value} -> $mappableName.$memberName"
       }
     }
 
@@ -44,8 +44,8 @@ class entity extends StaticAnnotation {
       ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
-        def toMap[..$tParams](${ToMap.entityName}: ${Option(tCompleteType)}): Map[String, Any] =
-          Map[String, Any](..${ToMap.keyValues(ToMap.entityName)})
+        def toMap[..$tParams](${ToMap.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
+          Map[String, Any](..${ToMap.keyValues(ToMap.mappableName)})
 
         def fromMap[..$tParams](values: Map[String, Any]): ${Option(tCompleteType)} =
           ${typeTermName}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
