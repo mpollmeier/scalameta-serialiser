@@ -5,7 +5,9 @@ lazy val commonSettings = Seq(
     "org.scalameta" %% "scalameta" % "1.3.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full),
+  licenses +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+  homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )
 
 lazy val scalameta_serialiser = project.in(file("."))
