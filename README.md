@@ -22,7 +22,7 @@ Annotating any case class with `mappable` will generate a companion object for y
 * `def toMap(myCaseClass: MyCaseClass): Map[String, Any]` 
 * `def fromMap(map: [String, Any]): Option[MyCaseClass]`
 
-For details check out [MappableTest.scala](blob/master/examples/src/test/scala/scala/meta/serialiser/SerialiserTest.scala)
+For details check out [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala)
 
 ## current limitations (a.k.a. TODOs)
 * no support for default values -> information is available inside Term.Param (Trees.scala in scalameta repo)
