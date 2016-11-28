@@ -11,13 +11,12 @@ class mappable extends StaticAnnotation {
     val q"..$mods class $tName[..$tParams] ..$ctorMods (...$paramss) extends $template" = defn
     val typeTermName = Term.Name(tName.value)
 
-    val tCompleteType: Type = {
-      val tParamTypes: Seq[Type] = tParams map Helpers.toType
-      val tCompleteTerm: Term =
-        if (tParamTypes.isEmpty) q"$typeTermName"
-        else q"$typeTermName[..$tParamTypes]"
-      Helpers.toType(tCompleteTerm)
-    }
+    val tParamTypes: Seq[Type] = tParams map Helpers.toType
+    val tCompleteTerm: Term =
+      if (tParamTypes.isEmpty) q"$typeTermName"
+      else q"$typeTermName[..$tParamTypes]"
+    val tCompleteType: Type = Helpers.toType(tCompleteTerm)
+    val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
     object ToMap {
       val mappableName: Term.Name = q"mappable"
@@ -47,8 +46,10 @@ class mappable extends StaticAnnotation {
         def toMap[..$tParams](${ToMap.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
           Map[String, Any](..${ToMap.keyValues(ToMap.mappableName)})
 
-        def fromMap[..$tParams](values: Map[String, Any]): ${Option(tCompleteType)} =
-          ${typeTermName}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
+        def fromMap[..$tParams](values: Map[String, Any]): ${Option(tCompleteTypeOption)} =
+          scala.util.Try {
+            ${tCompleteTerm}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
+          }.toOption
       }
     """
 
