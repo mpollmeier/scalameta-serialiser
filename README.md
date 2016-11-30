@@ -5,8 +5,9 @@
 Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.11.8)
 
 ```
+resolvers += Resolver.bintrayIvyRepo("scalameta", "maven")
 libraryDependencies += "com.michaelpollmeier" %% "scalameta_serialiser" % "0.0.3"
-addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0.132" cross CrossVersion.full)
 ```
 
 # Usage
