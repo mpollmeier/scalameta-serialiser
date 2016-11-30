@@ -19,7 +19,7 @@ import scala.meta.serialiser.mappable
 @mappable case class MyCaseClass(i: Int)
 ```
 
-Annotating any case class with `mappable` will generate a companion object for your case class with two functions: 
+Annotating any case class with `mappable` will generate a companion object (or extend it if one already exists) for your case class with two functions: 
 * `def toMap(myCaseClass: MyCaseClass): Map[String, Any]` 
 * `def fromMap(map: [String, Any]): Option[MyCaseClass]`
 
@@ -27,11 +27,6 @@ For details check out [MappableTest.scala](examples/src/test/scala/scala/meta/se
 
 ## current limitations (a.k.a. TODOs)
 * no support for default values -> information is available inside Term.Param (Trees.scala in scalameta repo)
-* will fail if there is an existing companion object
-  * can we match the companion object so we can track ? it's not in `defn`
-  * any way to generate another object with a different name?
-    * definition in macro paradise?
-      git grep 'eponymous companions'
 
 # sbt command to compile and test this project
 ~;clean;examples/clean;examples/test

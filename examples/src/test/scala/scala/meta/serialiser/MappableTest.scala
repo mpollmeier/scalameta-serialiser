@@ -6,6 +6,9 @@ object TestEntities {
   @mappable case class SimpleCaseClass(i: Int, s: String)
   @mappable case class WithTypeParam[N <: Number](n: Number)
   @mappable case class WithBody(i: Int) { def banana: Int = i }
+
+  object WithCompanion { def existingFun(): Int = 42 }
+  @mappable case class WithCompanion (i: Int, s: String)
 }
 
 class MappableTest extends WordSpec with Matchers {
@@ -33,11 +36,27 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
+  "case class with companion" should {
+    "serialise and deserialise" in {
+      val testInstance = WithCompanion(i = 42, s = "something")
+      val keyValues = WithCompanion.toMap(testInstance)
+      WithCompanion.fromMap(keyValues) shouldBe Some(testInstance)
+    }
+
+    "keep existing functionality in companion" in {
+      WithCompanion.existingFun shouldBe 42
+    }
+  }
+
   "fromMap" should {
     "return None if provided with invalid data" in {
       val invalidKeyValues = Map("in" -> "valid")
 
-      Seq(SimpleCaseClass.fromMap _, WithTypeParam.fromMap _, WithBody.fromMap _) foreach { fromMap =>
+      Seq(
+        SimpleCaseClass.fromMap _,
+        WithTypeParam.fromMap _,
+        WithBody.fromMap _,
+        WithCompanion.fromMap _) foreach { fromMap =>
         fromMap(invalidKeyValues) shouldBe None
       }
     }
