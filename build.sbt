@@ -5,7 +5,15 @@ lazy val commonSettings = Seq(
     "org.scalameta" %% "scalameta" % "1.3.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M5" cross CrossVersion.full),
+  // New-style macro annotations are under active development.  As a result, in
+  // this build we'll be referring to snapshot versions of both scala.meta and
+  // macro paradise.
+  // https://github.com/scalameta/sbt-macro-example/blob/master/build.sbt#L5-L13
+  resolvers += Resolver.bintrayIvyRepo("scalameta", "maven"),
+  // A dependency on macro paradise 3.x is required to both write and expand
+  // new-style macros.  This is similar to how it works for old-style macro
+  // annotations and a dependency on macro paradise 2.x.
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0.132" cross CrossVersion.full),
   licenses +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )

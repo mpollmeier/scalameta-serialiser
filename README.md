@@ -33,4 +33,4 @@ For details check out [MappableTest.scala](examples/src/test/scala/scala/meta/se
       git grep 'eponymous companions'
 
 # sbt command to compile and test this project
-~;clean;examples/test
+~;clean;examples/clean;examples/test
