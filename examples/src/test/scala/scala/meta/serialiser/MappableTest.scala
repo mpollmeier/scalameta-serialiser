@@ -9,6 +9,7 @@ object TestEntities {
 
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
+  @mappable case class WithDefaultValue(i: Int = 13, s: String)
 }
 
 class MappableTest extends WordSpec with Matchers {
@@ -45,6 +46,25 @@ class MappableTest extends WordSpec with Matchers {
 
     "keep existing functionality in companion" in {
       WithCompanion.existingFun shouldBe 42
+    }
+  }
+
+  "case class with default" should {
+    "serialise and deserialise" in {
+      val testInstance = WithDefaultValue(s = "something")
+      val keyValue = WithDefaultValue.toMap(testInstance)
+      WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
+    }
+
+    "store defaultMap" in {
+      val testInstance = WithDefaultValue(s = "something")
+      WithDefaultValue.defaultMap shouldBe (Map[String, Any]("i" -> 13))
+    }
+
+    "keep default value in fromMap" in {
+      val testInstance = WithDefaultValue(s = "something")
+      val keyValue = Map[String, Any]("s" -> "something")
+      WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
   }
 
