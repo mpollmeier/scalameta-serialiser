@@ -56,9 +56,9 @@ class MappableTest extends WordSpec with Matchers {
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
 
-    "store defaultMap" in {
+    "store correct defaultValueMap" in {
       val testInstance = WithDefaultValue(s = "something")
-      WithDefaultValue.defaultMap shouldBe (Map[String, Any]("i" -> 13))
+      WithDefaultValue.defaultValueMap shouldBe (Map[String, Any]("i" -> 13))
     }
 
     "keep default value in fromMap" in {
