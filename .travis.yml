@@ -6,6 +6,5 @@ jdk:
 sudo: false
 
 script:
-  - sbt clean
   - sbt examples/test
   - sbt test
