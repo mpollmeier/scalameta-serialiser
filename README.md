@@ -26,6 +26,7 @@ Annotating any case class with `mappable` will generate a companion object (or e
 For details check out [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala)
 
 ## current limitations (a.k.a. TODOs)
+- not support `fromMap` for multiple constructor params lists
 
 # sbt command to compile and test this project
 ;clean;examples/clean;examples/test

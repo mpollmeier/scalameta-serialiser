@@ -46,7 +46,7 @@ class mappable extends StaticAnnotation {
       val ctorValuesName: Term.Name = q"values"
 
       // get default value and store those value as a map in object
-      val defaultValue = paramss.flatten collect {
+      val defaultValue:  Seq[Term.ApplyInfix] = paramss.flatten collect {
         case param if param.default.nonEmpty =>
           q"""${param.name.value} -> ${param.default.get}"""
       }
