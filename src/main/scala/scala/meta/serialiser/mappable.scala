@@ -45,6 +45,12 @@ class mappable extends StaticAnnotation {
     object FromMap {
       val ctorValuesName: Term.Name = q"values"
 
+      // get default value and store those value as a map in object
+      val defaultValue:  Seq[Term.ApplyInfix] = paramss.flatten collect {
+        case param if param.default.nonEmpty =>
+          q"""${param.name.value} -> ${param.default.get}"""
+      }
+
     // TODO: support multiple constructor params lists
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
       def ctorArgs(valuesName: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
@@ -58,13 +64,17 @@ class mappable extends StaticAnnotation {
       ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
+        val defaultValueMap: Map[String, Any] = Map(..${FromMap.defaultValue})
+
         def toMap[..$tParams](${ToMap.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
           Map[String, Any](..${ToMap.keyValues(ToMap.mappableName)})
 
-        def fromMap[..$tParams](values: Map[String, Any]): ${Option(tCompleteTypeOption)} =
-          scala.util.Try {
-            ${tCompleteTerm}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
-          }.toOption
+        def fromMap[..$tParams](v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
+            val values = defaultValueMap ++ v
+            scala.util.Try {
+              ${tCompleteTerm}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
+            }.toOption
+          }
 
          ..$compStats
       }
