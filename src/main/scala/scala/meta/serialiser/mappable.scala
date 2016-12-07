@@ -5,6 +5,9 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 
+// type classes that mappable will generate
+trait ToMap[A] { def apply(a: A): Map[String, Any] }
+
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
@@ -33,7 +36,7 @@ class mappable extends StaticAnnotation {
     val tCompleteType: Type = Helpers.toType(tCompleteTerm)
     val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
-    object ToMap {
+    object ToMapImpl {
       val mappableName: Term.Name = q"mappable"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
       def keyValues(mappableName: Term.Name): Seq[Term] = paramssFlat.map { param =>
@@ -66,8 +69,10 @@ class mappable extends StaticAnnotation {
       object $typeTermName {
         val defaultValueMap: Map[String, Any] = Map(..${FromMap.defaultValue})
 
-        def toMap[..$tParams](${ToMap.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
-          Map[String, Any](..${ToMap.keyValues(ToMap.mappableName)})
+        implicit def ToMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
+          override def apply(${ToMapImpl.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
+            Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.mappableName)})
+        }
 
         def fromMap[..$tParams](v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
             val values = defaultValueMap ++ v
