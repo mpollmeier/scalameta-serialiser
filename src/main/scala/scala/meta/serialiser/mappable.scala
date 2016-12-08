@@ -37,14 +37,6 @@ class mappable extends StaticAnnotation {
     val tCompleteType: Type = Helpers.toType(tCompleteTerm)
     val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
-    // println(tCompleteType.getClass)
-    // val tCompleteTypeParam: Type.Param = toTypeParam(tCompleteType)
-    // def toTypeParam(tpe: Type): Type.Param = tpe match {
-    //   case Type.Name(nameStr) => 
-    //     val name = new Type.Param.Name{}
-    //     Type.Param(mods = Nil, name = name, tparams = Nil, tbounds = ???, vbounds = Nil, cbounds = Nil)
-    // }
-
     object ToMapImpl {
       val mappableName: Term.Name = q"mappable"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
@@ -83,6 +75,10 @@ class mappable extends StaticAnnotation {
             Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.mappableName)})
         }
 
+        implicit class ToMapOps[..$tParams](instance: $tCompleteType) {
+          def toMap(implicit toMap: ToMap[$tCompleteType]): Map[String, Any] = toMap(instance)
+        }
+
         def fromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
           override def apply(v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
               val values = defaultValueMap ++ v
@@ -96,9 +92,6 @@ class mappable extends StaticAnnotation {
       }
     """
 
-        //implicit class ToMapOps[$tCompleteTypeParam](instance: $tCompleteType) {
-          //def toMap(implicit toMap: ToMap[$tCompleteType]): Map[String, Any] = toMap(instance)
-        //}
 
     // println(res)
     res

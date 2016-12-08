@@ -16,9 +16,16 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0.132" cross CrossVersion.
 
 ```scala
 import scala.meta.serialiser.mappable
-@mappable case class MyCaseClass(i: Int)
+@mappable case class SimpleCaseClass(i: Int, s: String)
+
+val testInstance = SimpleCaseClass(i = 42, s = "something")
+val keyValues: Map[String, Any] = testInstance.toMap
+SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 ```
 
+For working examples have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
+
+## Understand what's going on
 Annotating any case class with `mappable` will generate typeclass instances `FromMap` and `ToMap` that let you serialise and deserialise that specific case class. 
 
 ```scala
@@ -31,8 +38,7 @@ trait FromMap[A] {
 }
 ```
 
-The typeclass instances will end up in the companion object and will automatically be in scope. 
-For details have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
+These typeclass instances end up in the companion object.
 
 ## current limitations (a.k.a. TODOs) 
 - no support for multiple constructor parameter lists

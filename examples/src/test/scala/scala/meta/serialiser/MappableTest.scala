@@ -18,9 +18,7 @@ class MappableTest extends WordSpec with Matchers {
   "simple case class" should {
     "serialise and deserialise" in {
       val testInstance = SimpleCaseClass(i = 42, s = "something")
-      val toMap = implicitly[ToMap[SimpleCaseClass]]
-
-      val keyValues = toMap(testInstance)
+      val keyValues = testInstance.toMap
       SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
@@ -28,9 +26,7 @@ class MappableTest extends WordSpec with Matchers {
   "case class with type param" should {
     "serialise and deserialise" in {
       val testInstance = WithTypeParam[Integer](n = 43)
-      val toMap = implicitly[ToMap[WithTypeParam[Integer]]]
-
-      val keyValues = toMap(testInstance)
+      val keyValues = testInstance.toMap
       WithTypeParam.fromMap[Integer](keyValues) shouldBe Some(testInstance)
     }
   }
@@ -44,9 +40,7 @@ class MappableTest extends WordSpec with Matchers {
   "case class with companion" should {
     "serialise and deserialise" in {
       val testInstance = WithCompanion(i = 42, s = "something")
-      val toMap = implicitly[ToMap[WithCompanion]]
-
-      val keyValues = toMap(testInstance)
+      val keyValues = testInstance.toMap
       WithCompanion.fromMap(keyValues) shouldBe Some(testInstance)
     }
 
@@ -58,9 +52,7 @@ class MappableTest extends WordSpec with Matchers {
   "case class with default" should {
     "serialise and deserialise" in {
       val testInstance = WithDefaultValue(s = "something")
-      val toMap = implicitly[ToMap[WithDefaultValue]]
-
-      val keyValue = toMap(testInstance)
+      val keyValue = testInstance.toMap
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
 
@@ -70,7 +62,6 @@ class MappableTest extends WordSpec with Matchers {
 
     "keep default value in fromMap" in {
       val testInstance = WithDefaultValue(s = "something") // with default i = 13
-
       val keyValue = Map[String, Any]("s" -> "something")
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
