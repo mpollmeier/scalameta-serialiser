@@ -18,20 +18,22 @@ class MappableTest extends WordSpec with Matchers {
   "simple case class" should {
     "serialise and deserialise" in {
       val testInstance = SimpleCaseClass(i = 42, s = "something")
-
       val toMap = implicitly[ToMap[SimpleCaseClass]]
+      val fromMap = implicitly[FromMap[SimpleCaseClass]]
+
       val keyValues = toMap(testInstance)
-      SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
+      fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
 
   "case class with type param" should {
     "serialise and deserialise" in {
       val testInstance = WithTypeParam[Integer](n = 43)
-
       val toMap = implicitly[ToMap[WithTypeParam[Integer]]]
+      val fromMap = implicitly[FromMap[WithTypeParam[Integer]]]
+
       val keyValues = toMap(testInstance)
-      WithTypeParam.fromMap(keyValues) shouldBe Some(testInstance)
+      fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
 
@@ -44,10 +46,11 @@ class MappableTest extends WordSpec with Matchers {
   "case class with companion" should {
     "serialise and deserialise" in {
       val testInstance = WithCompanion(i = 42, s = "something")
-
       val toMap = implicitly[ToMap[WithCompanion]]
+      val fromMap = implicitly[FromMap[WithCompanion]]
+
       val keyValues = toMap(testInstance)
-      WithCompanion.fromMap(keyValues) shouldBe Some(testInstance)
+      fromMap(keyValues) shouldBe Some(testInstance)
     }
 
     "keep existing functionality in companion" in {
@@ -58,10 +61,11 @@ class MappableTest extends WordSpec with Matchers {
   "case class with default" should {
     "serialise and deserialise" in {
       val testInstance = WithDefaultValue(s = "something")
-
       val toMap = implicitly[ToMap[WithDefaultValue]]
+      val fromMap = implicitly[FromMap[WithDefaultValue]]
+
       val keyValue = toMap(testInstance)
-      WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
+      fromMap(keyValue) shouldBe Some(testInstance)
     }
 
     "store correct defaultValueMap" in {
@@ -70,23 +74,25 @@ class MappableTest extends WordSpec with Matchers {
 
     "keep default value in fromMap" in {
       val testInstance = WithDefaultValue(s = "something") // with default i = 13
+      val fromMap = implicitly[FromMap[WithDefaultValue]]
+
       val keyValue = Map[String, Any]("s" -> "something")
-      WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
+      fromMap(keyValue) shouldBe Some(testInstance)
     }
   }
 
-  // "fromMap" should {
-  //   "return None if provided with invalid data" in {
-  //     val invalidKeyValues = Map("in" -> "valid")
+  "fromMap" should {
+    "return None if provided with invalid data" in {
+      val invalidKeyValues = Map("in" -> "valid")
 
-  //     Seq(
-  //       SimpleCaseClass.fromMap _,
-  //       WithTypeParam.fromMap _,
-  //       WithBody.fromMap _,
-  //       WithCompanion.fromMap _) foreach { fromMap =>
-  //       fromMap(invalidKeyValues) shouldBe None
-  //     }
-  //   }
-  // }
+      Seq(
+        SimpleCaseClass.FromMap,
+        WithTypeParam.FromMap[Integer],
+        WithBody.FromMap,
+        WithCompanion.FromMap) foreach { fromMap: FromMap[_] =>
+          fromMap(invalidKeyValues) shouldBe None
+      }
+    }
+  }
 
 }

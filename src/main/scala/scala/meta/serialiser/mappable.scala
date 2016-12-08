@@ -5,8 +5,9 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 
-// type classes that mappable will generate
+// type classes that mappable will generate for annotated classes
 trait ToMap[A] { def apply(a: A): Map[String, Any] }
+trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
 
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
@@ -45,7 +46,7 @@ class mappable extends StaticAnnotation {
       }
     }
 
-    object FromMap {
+    object FromMapImpl {
       val ctorValuesName: Term.Name = q"values"
 
       // get default value and store those value as a map in object
@@ -67,21 +68,23 @@ class mappable extends StaticAnnotation {
       ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
-        val defaultValueMap: Map[String, Any] = Map(..${FromMap.defaultValue})
+        val defaultValueMap: Map[String, Any] = Map(..${FromMapImpl.defaultValue})
 
         implicit def ToMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
           override def apply(${ToMapImpl.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
             Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.mappableName)})
         }
 
-        def fromMap[..$tParams](v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
-            val values = defaultValueMap ++ v
-            scala.util.Try {
-              ${tCompleteTerm}(..${FromMap.ctorArgs(FromMap.ctorValuesName)})
-            }.toOption
-          }
+        implicit def FromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
+          override def apply(v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
+              val values = defaultValueMap ++ v
+              scala.util.Try {
+                ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorValuesName)})
+              }.toOption
+            }
+        }
 
-         ..$compStats
+        ..$compStats
       }
     """
 
