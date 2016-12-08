@@ -83,7 +83,7 @@ class mappable extends StaticAnnotation {
             Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.mappableName)})
         }
 
-        implicit def fromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
+        def fromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
           override def apply(v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
               val values = defaultValueMap ++ v
               scala.util.Try {
