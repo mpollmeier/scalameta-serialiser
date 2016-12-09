@@ -3,11 +3,13 @@ package scala.meta.serialiser
 import scala.annotation.compileTimeOnly
 import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
+import scala.meta.Type.Arg
 import scala.meta._
 
 // type classes that mappable will generate for annotated classes
 trait ToMap[A] { def apply(a: A): Map[String, Any] }
 trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
+trait ToTargetTypeMap[A, T] { def apply(a: A): Map[String, T]}
 
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
@@ -37,6 +39,29 @@ class mappable extends StaticAnnotation {
     val tCompleteType: Type = Helpers.toType(tCompleteTerm)
     val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
+    object ToTargetTypeMapImpl {
+      // without semantic, how can we figure those types are the same or not
+      val paramsTpes: Map[String, Seq[(Arg, String)]] = paramss.flatten.map(x => (x.decltpe.get, x.name.value)).groupBy(_._1.toString)
+
+      val targetTypesInstance: Seq[Stat] = paramsTpes map {
+        case (tpe, args) =>
+          val instanceName = Term.Name(s"to${tpe}TypeMap")
+          val targetType: Type = Type.Name(tpe)
+          val mappableName: Term.Name = q"mappable"
+          val keyValues = args map {
+            case (tpe, name) => q"$name -> $mappableName.${Term.Name(name)}"
+          }
+
+          q"""
+              implicit def $instanceName[..$tParams] = new scala.meta.serialiser.ToTargetTypeMap[$tCompleteType, $targetType] {
+                override def apply($mappableName: ${Option(tCompleteType)}): Map[String, $targetType] =
+                  Map[String, $targetType](..$keyValues)
+                }
+            """.asInstanceOf[Stat]
+      } toList
+    }
+
+
     object ToMapImpl {
       val mappableName: Term.Name = q"mappable"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
@@ -45,6 +70,8 @@ class mappable extends StaticAnnotation {
         q"${param.name.value} -> $mappableName.$memberName"
       }
     }
+
+
 
     object FromMapImpl {
       val ctorValuesName: Term.Name = q"values"
@@ -87,6 +114,8 @@ class mappable extends StaticAnnotation {
               }.toOption
             }
         }
+
+        ..${ToTargetTypeMapImpl.targetTypesInstance}
 
         ..$compStats
       }
