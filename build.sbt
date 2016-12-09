@@ -1,6 +1,10 @@
+val defaultScalaV = "2.12.1"
+
 lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
-  scalaVersion := "2.11.8",
+  scalaVersion := defaultScalaV, // if not using crossScalaVersions, i.e. prefixing sbt command with `+`
+  crossScalaVersions := Seq("2.11.8", defaultScalaV),
+  releaseCrossBuild := true,
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.4.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
