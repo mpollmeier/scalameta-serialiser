@@ -4,7 +4,7 @@ import org.scalatest._
 
 object TestEntities {
   @mappable case class SimpleCaseClass(i: Int, s: String)
-  @mappable case class WithTypeParam[N <: Number](n: Number)
+  @mappable case class WithTypeParam[N <: Number](n: N)
   @mappable case class WithBody(i: Int) { def banana: Int = i }
 
   object WithCompanion { def existingFun(): Int = 42 }
@@ -20,6 +20,9 @@ class MappableTest extends WordSpec with Matchers {
       val testInstance = SimpleCaseClass(i = 42, s = "something")
       val keyValues = testInstance.toMap
       SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
+
+      val toTargetMap  = implicitly[ToTargetTypeMap[SimpleCaseClass, Int]]
+      toTargetMap(testInstance) shouldBe Map[String, Int]("i" -> 42)
     }
   }
 
@@ -28,6 +31,9 @@ class MappableTest extends WordSpec with Matchers {
       val testInstance = WithTypeParam[Integer](n = 43)
       val keyValues = testInstance.toMap
       WithTypeParam.fromMap[Integer](keyValues) shouldBe Some(testInstance)
+
+      val toTargetMap  = implicitly[ToTargetTypeMap[WithTypeParam[Integer], Integer]]
+      toTargetMap(testInstance) shouldBe Map[String, Integer]("n" -> 43)
     }
   }
 
