@@ -93,7 +93,7 @@ class mappable extends StaticAnnotation {
     """
 
 
-    // println(res)
+    println(res)
     res
   }
 }

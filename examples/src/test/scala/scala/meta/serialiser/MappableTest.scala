@@ -3,6 +3,7 @@ package scala.meta.serialiser
 import org.scalatest._
 
 object TestEntities {
+  @mappable class SimpleClass(val i: Int, val s: String)
   @mappable case class SimpleCaseClass(i: Int, s: String)
   @mappable case class WithTypeParam[N <: Number](n: Number)
   @mappable case class WithBody(i: Int) { def banana: Int = i }
@@ -14,6 +15,16 @@ object TestEntities {
 
 class MappableTest extends WordSpec with Matchers {
   import TestEntities._
+
+  "simple class" should {
+    "serialise and deserialise" in {
+      // val testInstance = new SimpleClass(i = 42, s = "something")
+      // testInstance.i
+      // testInstance.s
+      // val keyValues = testInstance.toMap
+      // SimpleClass.fromMap(keyValues) shouldBe Some(testInstance)
+    }
+  }
 
   "simple case class" should {
     "serialise and deserialise" in {
