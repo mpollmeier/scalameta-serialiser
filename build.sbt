@@ -18,8 +18,17 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )
 
+lazy val compilerOptions = Seq[String]()
+
 lazy val scalameta_serialiser = project.in(file("."))
   .settings(commonSettings: _*)
+  .settings(scalacOptions in (Compile, console) := compilerOptions :+ "-Yrepl-class-based")
+  .settings(
+    initialCommands in console :=
+      """
+        |import scala.meta._
+      """.stripMargin
+  )
 
 lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
