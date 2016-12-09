@@ -16,18 +16,33 @@ addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0.132" cross CrossVersion.
 
 ```scala
 import scala.meta.serialiser.mappable
-@mappable case class MyCaseClass(i: Int)
+@mappable case class SimpleCaseClass(i: Int, s: String)
+
+val testInstance = SimpleCaseClass(i = 42, s = "something")
+val keyValues: Map[String, Any] = testInstance.toMap
+SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 ```
 
-Annotating any case class with `mappable` will generate a companion object (or extend it if one already exists) for your case class with two functions: 
-* `def toMap(myCaseClass: MyCaseClass): Map[String, Any]` 
-* `def fromMap(map: [String, Any]): Option[MyCaseClass]`
+For working examples have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
 
-For details check out [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala)
+## Understand what's going on
+Annotating any case class with `mappable` will generate typeclass instances `FromMap` and `ToMap` that let you serialise and deserialise that specific case class. 
+
+```scala
+trait ToMap[A] {
+  def apply(a: A): Map[String, Any]
+}
+
+trait FromMap[A] {
+  def apply(keyValues: Map[String, Any]): Option[A]
+}
+```
+
+These typeclass instances end up in the companion object.
 
 ## current limitations (a.k.a. TODOs) 
-- not support `fromMap` for multiple constructor params lists
-- get maps of specific types
+- no support for multiple constructor parameter lists
+- [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
 
 # sbt command to compile and test this project
 ;clean;examples/clean;examples/test

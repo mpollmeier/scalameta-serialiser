@@ -18,7 +18,7 @@ class MappableTest extends WordSpec with Matchers {
   "simple case class" should {
     "serialise and deserialise" in {
       val testInstance = SimpleCaseClass(i = 42, s = "something")
-      val keyValues = SimpleCaseClass.toMap(testInstance)
+      val keyValues = testInstance.toMap
       SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
@@ -26,8 +26,8 @@ class MappableTest extends WordSpec with Matchers {
   "case class with type param" should {
     "serialise and deserialise" in {
       val testInstance = WithTypeParam[Integer](n = 43)
-      val keyValues = WithTypeParam.toMap(testInstance)
-      WithTypeParam.fromMap(keyValues) shouldBe Some(testInstance)
+      val keyValues = testInstance.toMap
+      WithTypeParam.fromMap[Integer](keyValues) shouldBe Some(testInstance)
     }
   }
 
@@ -40,7 +40,7 @@ class MappableTest extends WordSpec with Matchers {
   "case class with companion" should {
     "serialise and deserialise" in {
       val testInstance = WithCompanion(i = 42, s = "something")
-      val keyValues = WithCompanion.toMap(testInstance)
+      val keyValues = testInstance.toMap
       WithCompanion.fromMap(keyValues) shouldBe Some(testInstance)
     }
 
@@ -52,7 +52,7 @@ class MappableTest extends WordSpec with Matchers {
   "case class with default" should {
     "serialise and deserialise" in {
       val testInstance = WithDefaultValue(s = "something")
-      val keyValue = WithDefaultValue.toMap(testInstance)
+      val keyValue = testInstance.toMap
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
 
@@ -72,11 +72,11 @@ class MappableTest extends WordSpec with Matchers {
       val invalidKeyValues = Map("in" -> "valid")
 
       Seq(
-        SimpleCaseClass.fromMap _,
-        WithTypeParam.fromMap _,
-        WithBody.fromMap _,
-        WithCompanion.fromMap _) foreach { fromMap =>
-        fromMap(invalidKeyValues) shouldBe None
+        SimpleCaseClass.fromMap,
+        WithTypeParam.fromMap[Integer],
+        WithBody.fromMap,
+        WithCompanion.fromMap) foreach { fromMap: FromMap[_] =>
+          fromMap(invalidKeyValues) shouldBe None
       }
     }
   }
