@@ -6,7 +6,7 @@ Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.
 
 ```
 resolvers += Resolver.bintrayIvyRepo("scalameta", "maven")
-libraryDependencies += "com.michaelpollmeier" %% "scalameta_serialiser" % "0.0.4"
+libraryDependencies += "com.michaelpollmeier" %% "scalameta_serialiser" % "LATEST_VERSION"
 addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0.132" cross CrossVersion.full)
 ```
 

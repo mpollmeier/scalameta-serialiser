@@ -2,7 +2,7 @@ lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
   scalaVersion := "2.11.8",
   libraryDependencies ++= Seq(
-    "org.scalameta" %% "scalameta" % "1.4.0",
+    "org.scalameta" %% "scalameta" % "1.6.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ),
   // New-style macro annotations are under active development.  As a result, in
