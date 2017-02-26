@@ -42,6 +42,7 @@ These typeclass instances end up in the companion object.
 ## TODOs
 * [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
 * support for multiple constructor parameter lists
+* allow to switch between `null` entry and missing entry in Map when dealing with an Option type (currently maps to `null`)
 
 # sbt command to compile and test this project
 ;clean;examples/clean;examples/test

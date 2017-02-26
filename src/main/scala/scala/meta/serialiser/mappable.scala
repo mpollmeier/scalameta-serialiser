@@ -43,8 +43,15 @@ class mappable extends StaticAnnotation {
       val mappableName: Term.Name = q"mappable"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
       def keyValues(mappableName: Term.Name): Seq[Term] = paramssFlat.map { param =>
-        val memberName = Term.Name(param.name.value)
-        q"${param.name.value} -> $mappableName.$memberName"
+        val paramName: String = param.name.value
+        val nameTerm = Term.Name(paramName)
+        param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
+          case _: Type.Name => // simple type, e.g. String
+            q"$paramName -> $mappableName.$nameTerm"
+          case Type.Apply(Type.Name(tpeName), _) if tpeName == "Option" => // Option[A]
+            q"$paramName -> $mappableName.$nameTerm.getOrElse(null)"
+          case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
+        }
       }
     }
 
@@ -65,7 +72,7 @@ class mappable extends StaticAnnotation {
           case tpe: Type.Name => // simple type, e.g. String
             q"""$mapWithValues($paramName).asInstanceOf[$tpe]""" 
           case completeTpe @ Type.Apply(Type.Name(tpeName), wrappedTpe :: Nil) if tpeName == "Option" => // Option[A]
-            q"""$mapWithValues.get($paramName).asInstanceOf[$completeTpe]""" 
+            q"""Option($mapWithValues.get($paramName).orNull).asInstanceOf[$completeTpe]""" 
           case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
         }
         q""" $nameTerm = $fromMapWithExpectedType"""

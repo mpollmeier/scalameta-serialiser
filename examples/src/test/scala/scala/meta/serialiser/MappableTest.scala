@@ -42,15 +42,15 @@ class MappableTest extends WordSpec with Matchers {
     "serialise and deserialise `None`" in {
       val testInstance = WithOption(i = 42, s = None)
       val keyValues = testInstance.toMap
-      keyValues shouldBe Map("i" -> 42)
-      SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
+      keyValues shouldBe Map("i" -> 42, "s" -> null)
+      WithOption.fromMap(keyValues) shouldBe Some(testInstance)
     }
 
     "serialise and deserialise `Some`" in {
       val testInstance = WithOption(i = 42, s = Some("thing"))
       val keyValues = testInstance.toMap
       keyValues shouldBe Map("i" -> 42, "s" -> "thing")
-      SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
+      WithOption.fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
 
