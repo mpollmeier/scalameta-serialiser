@@ -9,6 +9,8 @@ import scala.meta._
 trait ToMap[A] { def apply(a: A): Map[String, Any] }
 trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
 
+case class SerialiserException(message: String, cause: Option[Throwable] = None) extends RuntimeException(message, cause.orNull)
+
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
@@ -47,7 +49,7 @@ class mappable extends StaticAnnotation {
     }
 
     object FromMapImpl {
-      val ctorValuesName: Term.Name = q"values"
+      val ctorMapWithValues: Term.Name = q"values"
 
       // get default value and store those value as a map in object
       val defaultValue:  Seq[Term.ApplyInfix] = paramss.flatten collect {
@@ -55,12 +57,18 @@ class mappable extends StaticAnnotation {
           q"""${param.name.value} -> ${param.default.get}"""
       }
 
-    // TODO: support multiple constructor params lists
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
-      def ctorArgs(valuesName: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
-        val nameTerm = Term.Name(param.name.value)
-        val tpe: Type = param.decltpe.get.asInstanceOf[Type.Name] // TODO: don't do option.get, don't cast
-        q""" $nameTerm = $valuesName(${param.name.value}).asInstanceOf[$tpe] """
+      def ctorArgs(mapWithValues: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
+        val paramName: String = param.name.value
+        val nameTerm = Term.Name(paramName)
+        val fromMapWithExpectedType = param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
+          case tpe: Type.Name => // simple type, e.g. String
+            q"""$mapWithValues($paramName).asInstanceOf[$tpe]""" 
+          case completeTpe @ Type.Apply(Type.Name(tpeName), wrappedTpe :: Nil) if tpeName == "Option" => // Option[A]
+            q"""$mapWithValues.get($paramName).asInstanceOf[$completeTpe]""" 
+          case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
+        }
+        q""" $nameTerm = $fromMapWithExpectedType"""
       }
     }
 
@@ -85,7 +93,7 @@ class mappable extends StaticAnnotation {
           override def apply(v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
               val values = defaultValueMap ++ v
               scala.util.Try {
-                ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorValuesName)})
+                ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorMapWithValues)})
               }.toOption
             }
         }
@@ -93,7 +101,6 @@ class mappable extends StaticAnnotation {
         ..$compStats
       }
     """
-
 
     // println(res)
     res

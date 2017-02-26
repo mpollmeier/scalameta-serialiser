@@ -39,9 +39,9 @@ trait FromMap[A] {
 
 These typeclass instances end up in the companion object.
 
-## current limitations (a.k.a. TODOs) 
-- no support for multiple constructor parameter lists
-- [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
+## TODOs
+* [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
+* support for multiple constructor parameter lists
 
 # sbt command to compile and test this project
 ;clean;examples/clean;examples/test

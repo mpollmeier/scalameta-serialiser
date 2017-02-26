@@ -6,6 +6,7 @@ object TestEntities {
   @mappable case class SimpleCaseClass(i: Int, s: String)
   @mappable case class WithTypeParam[N <: Number](n: Number)
   @mappable case class WithBody(i: Int) { def banana: Int = i }
+  @mappable case class WithOption(i: Int, s: Option[String])
 
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
@@ -34,6 +35,22 @@ class MappableTest extends WordSpec with Matchers {
   "case class with body" should {
     "still have the body as before" in {
       WithBody(100).banana shouldBe 100
+    }
+  }
+
+  "case class with Option member" should {
+    "serialise and deserialise `None`" in {
+      val testInstance = WithOption(i = 42, s = None)
+      val keyValues = testInstance.toMap
+      keyValues shouldBe Map("i" -> 42)
+      SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
+    }
+
+    "serialise and deserialise `Some`" in {
+      val testInstance = WithOption(i = 42, s = Some("thing"))
+      val keyValues = testInstance.toMap
+      keyValues shouldBe Map("i" -> 42, "s" -> "thing")
+      SimpleCaseClass.fromMap(keyValues) shouldBe Some(testInstance)
     }
   }
 
