@@ -16,12 +16,12 @@ lazy val commonSettings = Seq(
   homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )
 
-lazy val scalameta_serialiser = project.in(file("."))
+lazy val `scalameta-serialiser` = project.in(file("."))
   .settings(commonSettings: _*)
 
 lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
-  .dependsOn(scalameta_serialiser)
+  .dependsOn(`scalameta-serialiser`)
 
 releaseCrossBuild := true
 releasePublishArtifactsAction := PgpKeys.publishSigned.value

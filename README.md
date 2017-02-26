@@ -2,10 +2,10 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.11)
 
 # Setup with sbt
-Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta_serialiser_2.12) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.12.1)
+Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.12.1)
 
 ```
-libraryDependencies += "com.michaelpollmeier" %% "scalameta_serialiser" % "LATEST_VERSION"
+libraryDependencies += "com.michaelpollmeier" %% "scalameta-serialiser" % "LATEST_VERSION"
 addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M7" cross CrossVersion.full)
 ```
 
