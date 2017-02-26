@@ -2,9 +2,8 @@ val defaultScalaV = "2.12.1"
 
 lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
-  scalaVersion := defaultScalaV, // if not using crossScalaVersions, i.e. prefixing sbt command with `+`
-  crossScalaVersions := Seq("2.11.8", defaultScalaV),
-  releaseCrossBuild := true,
+  scalaVersion := defaultScalaV,
+  crossScalaVersions := Seq("2.11.8", defaultScalaV), //prefix sbt command with `+` to run it with these scala versions
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.6.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
@@ -24,6 +23,7 @@ lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
   .dependsOn(scalameta_serialiser)
 
+releaseCrossBuild := true
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 publishTo := {
   val sonatype = "https://oss.sonatype.org/"
