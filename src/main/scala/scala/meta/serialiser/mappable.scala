@@ -5,7 +5,7 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 
-// type classes that mappable will generate for annotated classes
+// type classes that @mappable will generate for annotated classes
 trait ToMap[A] { def apply(a: A): Map[String, Any] }
 trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
 
@@ -40,16 +40,16 @@ class mappable extends StaticAnnotation {
     val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
     object ToMapImpl {
-      val mappableName: Term.Name = q"mappable"
+      val instanceName: Term.Name = q"instance"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
-      def keyValues(mappableName: Term.Name): Seq[Term] = paramssFlat.map { param =>
+      def keyValues(instanceName: Term.Name): Seq[Term] = paramssFlat.map { param =>
         val paramName: String = param.name.value
         val nameTerm = Term.Name(paramName)
         param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case _: Type.Name => // simple type, e.g. String
-            q"$paramName -> $mappableName.$nameTerm"
+            q"$paramName -> $instanceName.$nameTerm"
           case Type.Apply(Type.Name(tpeName), _) if tpeName == "Option" => // Option[A]
-            q"$paramName -> $mappableName.$nameTerm.getOrElse(null)"
+            q"$paramName -> $instanceName.$nameTerm.getOrElse(null)"
           case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
         }
       }
@@ -88,8 +88,8 @@ class mappable extends StaticAnnotation {
         val defaultValueMap: Map[String, Any] = Map(..${FromMapImpl.defaultValue})
 
         implicit def toMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
-          override def apply(${ToMapImpl.mappableName}: ${Option(tCompleteType)}): Map[String, Any] =
-            Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.mappableName)})
+          override def apply(${ToMapImpl.instanceName}: ${Option(tCompleteType)}): Map[String, Any] =
+            Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.instanceName)})
         }
 
         implicit class ToMapOps[..$tParams](instance: $tCompleteType) {
