@@ -12,6 +12,7 @@ lazy val commonSettings = Seq(
   // new-style macros.  This is similar to how it works for old-style macro
   // annotations and a dependency on macro paradise 2.x.
   addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M7" cross CrossVersion.full),
+  scalacOptions ++= Seq("-Xlint", "-deprecation", "-feature"),
   licenses +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )

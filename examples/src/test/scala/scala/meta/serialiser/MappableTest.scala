@@ -7,10 +7,13 @@ object TestEntities {
   @mappable case class WithTypeParam[N <: Number](n: Number)
   @mappable case class WithBody(i: Int) { def banana: Int = i }
   @mappable case class WithOption(i: Int, s: Option[String])
+  @mappable case class WithDefaultValue(i: Int = 13, s: String)
 
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
-  @mappable case class WithDefaultValue(i: Int = 13, s: String)
+
+  @mappable(List("i" -> "iMapped", j -> "jMapped"))
+  case class WithCustomMapping(i: Int, j: Option[Int], s: String)
 }
 
 class MappableTest extends WordSpec with Matchers {
@@ -84,10 +87,20 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
+  "when defining custom mappings" should {
+    "serialise and deserialise" in {
+      val testInstance = WithCustomMapping(i = 42, j = Some(43), s = "something")
+      val keyValues = testInstance.toMap
+      keyValues shouldBe Map("iMapped" -> 42, "jMapped" -> 43, "s" -> "something")
+      WithCustomMapping.fromMap(keyValues) shouldBe Some(testInstance)
+    }
+  }
+
   "fromMap" should {
     "return None if provided with invalid data" in {
       val invalidKeyValues = Map("in" -> "valid")
 
+      // not necessarily a complete list
       Seq(
         SimpleCaseClass.fromMap,
         WithTypeParam.fromMap[Integer],

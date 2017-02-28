@@ -11,6 +11,7 @@ trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
 
 case class SerialiserException(message: String, cause: Option[Throwable] = None) extends RuntimeException(message, cause.orNull)
 
+/** example usage: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
@@ -43,13 +44,13 @@ class mappable extends StaticAnnotation {
       val instanceName: Term.Name = q"instance"
       val paramssFlat: Seq[Term.Param] = paramss.flatten
       def keyValues(instanceName: Term.Name): Seq[Term] = paramssFlat.map { param =>
-        val paramName: String = param.name.value
-        val nameTerm = Term.Name(paramName)
+        val propertyKey: String = PropertyMappings.forMember(param.name.value)
+        val nameTerm = Term.Name(param.name.value)
         param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case _: Type.Name => // simple type, e.g. String
-            q"$paramName -> $instanceName.$nameTerm"
+            q"$propertyKey -> $instanceName.$nameTerm"
           case Type.Apply(Type.Name(tpeName), _) if tpeName == "Option" => // Option[A]
-            q"$paramName -> $instanceName.$nameTerm.getOrElse(null)"
+            q"$propertyKey -> $instanceName.$nameTerm.getOrElse(null)"
           case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
         }
       }
@@ -66,16 +67,41 @@ class mappable extends StaticAnnotation {
 
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
       def ctorArgs(mapWithValues: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
-        val paramName: String = param.name.value
-        val nameTerm = Term.Name(paramName)
+        val propertyKey: String = PropertyMappings.forMember(param.name.value)
+        val nameTerm = Term.Name(param.name.value)
         val fromMapWithExpectedType = param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case tpe: Type.Name => // simple type, e.g. String
-            q"""$mapWithValues($paramName).asInstanceOf[$tpe]""" 
+            q"""$mapWithValues($propertyKey).asInstanceOf[$tpe]""" 
           case completeTpe @ Type.Apply(Type.Name(tpeName), wrappedTpe :: Nil) if tpeName == "Option" => // Option[A]
-            q"""Option($mapWithValues.get($paramName).orNull).asInstanceOf[$completeTpe]""" 
+            q"""Option($mapWithValues.get($propertyKey).orNull).asInstanceOf[$completeTpe]""" 
           case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
         }
         q""" $nameTerm = $fromMapWithExpectedType"""
+      }
+    }
+
+    object PropertyMappings {
+      def forMember(memberName: String): String =
+        customMappings.get(memberName).getOrElse(memberName)
+
+      /* not having named arguments to @mappable limits extensibility, but this is currently the only way to
+      * pass arguments to the macro annotation */
+      val customMappings: Map[String, String] = {
+        def illegalDefinition(unsupported: Tree) = throw new SerialiserException(
+          "illegal definition of @mappable annotation. Valid examples are e.g.:" +
+          " `@mappable` and `@mappable(List(\"memberName\" -> \"mappedName\")`. See MappableTest.scala for more examples. " +
+          s"Unsupported Tree: $unsupported of type ${unsupported.getClass}")
+
+        val mappings: Seq[(String, String)] = this match {
+          case q"new $_()" => Nil // no custom mappings
+          case q"new $_(${Term.Apply(_, mappings)})" => mappings.map { // I'd rather match on a refinement type, but that's unchecked :(
+            case Term.ApplyInfix(memberName: Lit, _, _, (mappedName: Lit) :: Nil) => (memberName.value.toString, mappedName.value.toString)
+            case Term.ApplyInfix(memberName: Term.Name, _, _, (mappedName: Lit) :: Nil) => (memberName.value.toString, mappedName.value.toString)
+            case unsupported => illegalDefinition(unsupported)
+          }
+          case unsupported => illegalDefinition(unsupported)
+        }
+        mappings.toMap
       }
     }
 
