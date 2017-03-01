@@ -30,6 +30,7 @@ class mappable extends StaticAnnotation {
     }
 
     val q"..$mods class $tName[..$tParams] ..$ctorMods (...$paramss) extends $template" = classDefn
+    val paramssFlat: Seq[Term.Param] = paramss.flatten
 
     val typeTermName = Term.Name(tName.value)
 
@@ -42,7 +43,6 @@ class mappable extends StaticAnnotation {
 
     object ToMapImpl {
       val instanceName: Term.Name = q"instance"
-      val paramssFlat: Seq[Term.Param] = paramss.flatten
       def keyValues(instanceName: Term.Name): Seq[Term] = paramssFlat.map { param =>
         val propertyKey: String = PropertyMappings.forMember(param.name.value)
         val nameTerm = Term.Name(param.name.value)
@@ -60,7 +60,7 @@ class mappable extends StaticAnnotation {
       val ctorMapWithValues: Term.Name = q"values"
 
       // get default value and store those value as a map in object
-      val defaultValue:  Seq[Term.ApplyInfix] = paramss.flatten collect {
+      val defaultValue:  Seq[Term.ApplyInfix] = paramssFlat collect {
         case param if param.default.nonEmpty =>
           q"""${param.name.value} -> ${param.default.get}"""
       }
