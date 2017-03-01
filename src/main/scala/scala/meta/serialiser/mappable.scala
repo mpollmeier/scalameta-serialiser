@@ -4,12 +4,15 @@ import scala.annotation.compileTimeOnly
 import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
+import scala.util.control.NoStackTrace
 
 // type classes that @mappable will generate for annotated classes
 trait ToMap[A] { def apply(a: A): Map[String, Any] }
 trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
 
-case class SerialiserException(message: String, cause: Option[Throwable] = None) extends RuntimeException(message, cause.orNull)
+case class SerialiserException(message: String, cause: Option[Throwable] = None)
+    extends RuntimeException(message, cause.orNull)
+    with NoStackTrace
 
 /** example usage: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
@@ -103,7 +106,17 @@ class mappable extends StaticAnnotation {
         }
         mappings.toMap
       }
+
+      def validateCustomMappings(): Unit = {
+        val memberNames: Set[String] = paramssFlat.map(_.name.value).toSet
+        customMappings.keys.foreach { key =>
+          if (!memberNames.contains(key))
+            throw new SerialiserException(s"mapped member '$key' is not a member of class '$tName'")
+        }
+      }
     }
+
+    PropertyMappings.validateCustomMappings()
 
     val res = q"""
       ..$mods class $tName[..$tParams](...$paramss) extends $template

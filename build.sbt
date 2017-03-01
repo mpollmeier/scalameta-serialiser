@@ -6,7 +6,8 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq("2.11.8", defaultScalaV), //prefix sbt command with `+` to run it with these scala versions
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.6.0",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+    "com.chuusai" %% "shapeless" % "2.3.2" % Test
   ),
   // A dependency on macro paradise 3.x is required to both write and expand
   // new-style macros.  This is similar to how it works for old-style macro

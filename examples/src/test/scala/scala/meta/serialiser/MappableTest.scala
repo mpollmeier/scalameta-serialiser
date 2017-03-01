@@ -1,6 +1,7 @@
 package scala.meta.serialiser
 
 import org.scalatest._
+import shapeless.test.illTyped
 
 object TestEntities {
   @mappable case class SimpleCaseClass(i: Int, s: String)
@@ -14,6 +15,14 @@ object TestEntities {
 
   @mappable(List("i" -> "iMapped", j -> "jMapped"))
   case class WithCustomMapping(i: Int, j: Option[Int], s: String)
+
+  illTyped(
+    """
+      @mappable(List("z" -> "zMapped"))
+      case class WithInvalidCustomMapping(i: Int, s: String)
+    """,
+    "exception during macro expansion: mapped member 'z' is not a member of class 'WithInvalidCustomMapping'"
+  )
 }
 
 class MappableTest extends WordSpec with Matchers {
@@ -110,5 +119,4 @@ class MappableTest extends WordSpec with Matchers {
       }
     }
   }
-
 }
