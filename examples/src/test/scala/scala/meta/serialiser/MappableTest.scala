@@ -13,8 +13,12 @@ object TestEntities {
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
 
-  @mappable(List("i" -> "iMapped", j -> "jMapped"))
+  @mappable(List(i -> "iMapped", j -> "jMapped"))
   case class WithCustomMapping(i: Int, j: Option[Int], s: String)
+
+  /* generated code will be printed out on the console */
+  @mappable(List(_debug -> true))
+  case class WithDebugEnabled(i: Int)
 
   illTyped(
     """

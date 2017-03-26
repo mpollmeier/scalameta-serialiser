@@ -84,12 +84,14 @@ class mappable extends StaticAnnotation {
     }
 
     object PropertyMappings {
+      val debugKey = "_debug" //if set to `true`, we will print the generated code
+
       def forMember(memberName: String): String =
         customMappings.get(memberName).getOrElse(memberName)
 
       /* not having named arguments to @mappable limits extensibility, but this is currently the only way to
       * pass arguments to the macro annotation */
-      val customMappings: Map[String, String] = {
+      val (customMappings: Map[String, String], debugEnabled: Boolean) = {
         def illegalDefinition(unsupported: Tree) = throw new SerialiserException(
           "illegal definition of @mappable annotation. Valid examples are e.g.:" +
           " `@mappable` and `@mappable(List(\"memberName\" -> \"mappedName\")`. See MappableTest.scala for more examples. " +
@@ -104,7 +106,9 @@ class mappable extends StaticAnnotation {
           }
           case unsupported => illegalDefinition(unsupported)
         }
-        mappings.toMap
+        val customMappings = mappings.filter(_._1 != debugKey).toMap // debugKey is in internal detail
+        val debugEnabled = mappings.contains((debugKey -> "true"))
+        (customMappings, debugEnabled)
       }
 
       def validateCustomMappings(): Unit = {
@@ -148,7 +152,7 @@ class mappable extends StaticAnnotation {
       }
     """
 
-    // println(res)
+    if (PropertyMappings.debugEnabled) println(res)
     res
   }
 }
