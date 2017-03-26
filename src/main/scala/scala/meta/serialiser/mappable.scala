@@ -7,8 +7,14 @@ import scala.meta._
 import scala.util.control.NoStackTrace
 
 // type classes that @mappable will generate for annotated classes
-trait ToMap[A] { def apply(a: A): Map[String, Any] }
-trait FromMap[A] { def apply(keyValues: Map[String, Any]): Option[A] }
+trait ToMap[A] {
+  def apply(a: A): Map[String, Any]
+  val customMappings: Map[String, String]
+}
+trait FromMap[A] {
+  def apply(keyValues: Map[String, Any]): Option[A]
+  val customMappings: Map[String, String]
+}
 
 case class SerialiserException(message: String, cause: Option[Throwable] = None)
     extends RuntimeException(message, cause.orNull)
@@ -47,7 +53,7 @@ class mappable extends StaticAnnotation {
     object ToMapImpl {
       val instanceName: Term.Name = q"instance"
       def keyValues(instanceName: Term.Name): Seq[Term] = paramssFlat.map { param =>
-        val propertyKey: String = PropertyMappings.forMember(param.name.value)
+        val propertyKey: String = CustomMappings.forMember(param.name.value)
         val nameTerm = Term.Name(param.name.value)
         param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case _: Type.Name => // simple type, e.g. String
@@ -70,7 +76,7 @@ class mappable extends StaticAnnotation {
 
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
       def ctorArgs(mapWithValues: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
-        val propertyKey: String = PropertyMappings.forMember(param.name.value)
+        val propertyKey: String = CustomMappings.forMember(param.name.value)
         val nameTerm = Term.Name(param.name.value)
         val fromMapWithExpectedType = param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case tpe: Type.Name => // simple type, e.g. String
@@ -83,7 +89,7 @@ class mappable extends StaticAnnotation {
       }
     }
 
-    object PropertyMappings {
+    object CustomMappings {
       val debugKey = "_debug" //if set to `true`, we will print the generated code
 
       def forMember(memberName: String): String =
@@ -91,24 +97,30 @@ class mappable extends StaticAnnotation {
 
       /* not having named arguments to @mappable limits extensibility, but this is currently the only way to
       * pass arguments to the macro annotation */
-      val (customMappings: Map[String, String], debugEnabled: Boolean) = {
+      val (mappingsAsTerms: Seq[Term], customMappings: Map[String, String], debugEnabled: Boolean) = {
         def illegalDefinition(unsupported: Tree) = throw new SerialiserException(
           "illegal definition of @mappable annotation. Valid examples are e.g.:" +
           " `@mappable` and `@mappable(List(\"memberName\" -> \"mappedName\")`. See MappableTest.scala for more examples. " +
           s"Unsupported Tree: $unsupported of type ${unsupported.getClass}")
 
-        val mappings: Seq[(String, String)] = this match {
-          case q"new $_()" => Nil // no custom mappings
+        val mappings: Seq[(Lit, Lit)] = this match {
+          case q"new $_()" => Nil // no mappings defined
           case q"new $_(${Term.Apply(_, mappings)})" => mappings.map { // I'd rather match on a refinement type, but that's unchecked :(
-            case Term.ApplyInfix(memberName: Lit, _, _, (mappedName: Lit) :: Nil) => (memberName.value.toString, mappedName.value.toString)
-            case Term.ApplyInfix(memberName: Term.Name, _, _, (mappedName: Lit) :: Nil) => (memberName.value.toString, mappedName.value.toString)
+            case Term.ApplyInfix(memberName: Lit, _, _, (mappedName: Lit) :: Nil) => (memberName, mappedName)
             case unsupported => illegalDefinition(unsupported)
           }
           case unsupported => illegalDefinition(unsupported)
         }
-        val customMappings = mappings.filter(_._1 != debugKey).toMap // debugKey is in internal detail
-        val debugEnabled = mappings.contains((debugKey -> "true"))
-        (customMappings, debugEnabled)
+
+        val mappingsAsTerms: Seq[Term] = mappings.map {
+          case (memberName: Lit, mappedName: Lit) => q"""$memberName -> $mappedName"""
+        }
+        val mappingsAsStrings: Map[String, String] = mappings.map {
+          case (memberName: Lit, mappedName: Lit) => (memberName.value.toString, mappedName.value.toString)
+        }.toMap
+        val debugEnabled: Boolean = mappingsAsStrings.getOrElse(debugKey, "false").toBoolean
+        val customMappings: Map[String, String] = mappingsAsStrings - debugKey // debugKey is in internal detail
+        (mappingsAsTerms, customMappings, debugEnabled)
       }
 
       def validateCustomMappings(): Unit = {
@@ -120,7 +132,7 @@ class mappable extends StaticAnnotation {
       }
     }
 
-    PropertyMappings.validateCustomMappings()
+    CustomMappings.validateCustomMappings()
 
     val res = q"""
       ..$mods class $tName[..$tParams](...$paramss) extends $template
@@ -133,6 +145,8 @@ class mappable extends StaticAnnotation {
         implicit def toMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
           override def apply(${ToMapImpl.instanceName}: ${Option(tCompleteType)}): Map[String, Any] =
             Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.instanceName)})
+
+          override val customMappings = Map[String, String](..${CustomMappings.mappingsAsTerms})
         }
 
         implicit class ToMapOps[..$tParams](instance: $tCompleteType) {
@@ -146,13 +160,15 @@ class mappable extends StaticAnnotation {
                 ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorMapWithValues)})
               }.toOption
             }
+          
+          override val customMappings = Map[String, String](..${CustomMappings.mappingsAsTerms})
         }
 
         ..$compStats
       }
     """
 
-    if (PropertyMappings.debugEnabled) println(res)
+    if (CustomMappings.debugEnabled) println(res)
     res
   }
 }

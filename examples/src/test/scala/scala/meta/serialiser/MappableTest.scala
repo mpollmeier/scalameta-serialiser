@@ -13,11 +13,11 @@ object TestEntities {
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
 
-  @mappable(List(i -> "iMapped", j -> "jMapped"))
+  @mappable(List("i" -> "iMapped", "j" -> "jMapped"))
   case class WithCustomMapping(i: Int, j: Option[Int], s: String)
 
   /* generated code will be printed out on the console */
-  @mappable(List(_debug -> true))
+  @mappable(List("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
 
   illTyped(
@@ -106,6 +106,12 @@ class MappableTest extends WordSpec with Matchers {
       val keyValues = testInstance.toMap
       keyValues shouldBe Map("iMapped" -> 42, "jMapped" -> 43, "s" -> "something")
       WithCustomMapping.fromMap(keyValues) shouldBe Some(testInstance)
+    }
+
+    "have our custom definitions available in ToMap and FromMap" in {
+      val expectedCustomMappings = Map("i" -> "iMapped", "j" -> "jMapped")
+      WithCustomMapping.fromMap.customMappings shouldBe expectedCustomMappings
+      WithCustomMapping.toMap.customMappings shouldBe expectedCustomMappings
     }
   }
 
