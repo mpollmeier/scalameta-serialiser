@@ -13,13 +13,18 @@ object TestEntities {
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
 
-  @mappable(List("i" -> "iMapped", "j" -> "jMapped"))
-  case class WithCustomMapping(i: Int, j: Option[Int], s: String)
-
   /* generated code will be printed out on the console */
   @mappable(List("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
 
+  @mappable(List("i" -> "iMapped", "j" -> "jMapped"))
+  case class WithCustomMapping(i: Int, j: Option[Int], s: String)
+
+  // mappings starting with `_` are treated as internal and won't be validated against members
+  @mappable(List("i" -> "iMapped", "_z" -> "internalDefinition"))
+  case class WithInternalMapping(i: Int)
+
+  // compilation should fail if mapping invalid member
   illTyped(
     """
       @mappable(List("z" -> "zMapped"))
@@ -109,9 +114,9 @@ class MappableTest extends WordSpec with Matchers {
     }
 
     "have our custom definitions available in ToMap and FromMap" in {
-      val expectedCustomMappings = Map("i" -> "iMapped", "j" -> "jMapped")
-      WithCustomMapping.fromMap.customMappings shouldBe expectedCustomMappings
-      WithCustomMapping.toMap.customMappings shouldBe expectedCustomMappings
+      val expectedCustomMappings = Map("i" -> "iMapped", "_z" -> "internalDefinition")
+      WithInternalMapping.fromMap.customMappings shouldBe expectedCustomMappings
+      WithInternalMapping.toMap.customMappings shouldBe expectedCustomMappings
     }
   }
 

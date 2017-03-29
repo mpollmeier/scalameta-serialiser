@@ -125,7 +125,8 @@ class mappable extends StaticAnnotation {
 
       def validateCustomMappings(): Unit = {
         val memberNames: Set[String] = paramssFlat.map(_.name.value).toSet
-        customMappings.keys.foreach { key =>
+        val mappedMembers = customMappings.keys.filterNot(_.startsWith("_"))
+        mappedMembers.foreach { key =>
           if (!memberNames.contains(key))
             throw new SerialiserException(s"mapped member '$key' is not a member of class '$tName'")
         }
