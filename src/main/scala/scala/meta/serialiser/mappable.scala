@@ -115,7 +115,7 @@ class mappable extends StaticAnnotation {
         val params: Seq[(Lit, Lit)] = this match {
           case q"new $_()" => Nil // no params defined
           case q"new $_(${Term.Apply(_, params)})" => params.map { // I'd rather match on a refinement type, but that's unchecked :(
-            case Term.ApplyInfix(name: Lit, _, _, (value: Lit) :: Nil) => (name -> value)
+            case q"${name: Lit} -> ${value: Lit}" => (name -> value)
             case unsupported => illegalDefinition(unsupported)
           }
           case unsupported => illegalDefinition(unsupported)
