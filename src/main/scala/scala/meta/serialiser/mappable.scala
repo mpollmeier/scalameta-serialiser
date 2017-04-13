@@ -28,7 +28,7 @@ class mappedTo(name: String) extends StaticAnnotation
 
 /** example usages: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
-class mappable extends StaticAnnotation {
+class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
 
     // defined class may or may not have a companion object
@@ -109,7 +109,7 @@ class mappable extends StaticAnnotation {
       val (debugEnabled: Boolean, paramsAsTerms: Seq[Term]) = {
         def illegalDefinition(unsupported: Tree) = throw new SerialiserException(
           "illegal definition of @mappable annotation. Valid examples are e.g.:" +
-          " `@mappable` and `@mappable(List(\"memberName\" -> \"mappedName\")`. See MappableTest.scala for more examples. " +
+          " `@mappable` and `@mappable(List(\"param1\" -> \"value1\")`. See MappableTest.scala for more examples. " +
           s"Unsupported Tree: $unsupported of type ${unsupported.getClass}")
 
         val params: Seq[(Lit, Lit)] = this match {

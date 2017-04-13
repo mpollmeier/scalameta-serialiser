@@ -14,7 +14,7 @@ object TestEntities {
   @mappable case class WithCompanion (i: Int, s: String)
 
   /* generated code will be printed out on the console */
-  @mappable(List("_debug" -> "true"))
+  @mappable(Map("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
 
   @mappable case class WithCustomMapping(
@@ -22,7 +22,7 @@ object TestEntities {
     @mappedTo("jMapped") j: Option[Int],
                          s: String)
 
-  @mappable(List("param1" -> "paramValue1"))
+  @mappable(Map("param1" -> "paramValue1"))
   case class WithAnnotationParam(i: Int)
 }
 
