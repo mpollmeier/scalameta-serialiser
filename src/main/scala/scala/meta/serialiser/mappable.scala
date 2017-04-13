@@ -20,7 +20,16 @@ case class SerialiserException(message: String, cause: Option[Throwable] = None)
     extends RuntimeException(message, cause.orNull)
     with NoStackTrace
 
-/** example usage: see MappableTest.scala */
+
+/** Map a class member to a custom name. Usage example: 
+  *  @mappable case class WithCustomMapping(
+  *    @mappedTo("iMapped") i: Int,
+  *    @mappedTo("jMapped") j: Option[Int],
+  *                         s: String)
+  */
+class mappedTo(name: String) extends StaticAnnotation
+
+/** example usages: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
 class mappable extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
@@ -50,10 +59,16 @@ class mappable extends StaticAnnotation {
     val tCompleteType: Type = Helpers.toType(tCompleteTerm)
     val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
+    val customMappings2: Map[Term.Param, String] = paramssFlat.map { param =>
+      param.mods.collect {
+        case mod"@mappedTo(${Lit.String(mappedTo)})" => (param -> mappedTo)
+      }
+    }.flatten.toMap.withDefault(_.name.value)
+
     object ToMapImpl {
       val instanceName: Term.Name = q"instance"
       def keyValues(instanceName: Term.Name): Seq[Term] = paramssFlat.map { param =>
-        val propertyKey: String = CustomMappings.forMember(param.name.value)
+        val propertyKey: String = customMappings2(param)
         val nameTerm = Term.Name(param.name.value)
         param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case _: Type.Name => // simple type, e.g. String
@@ -76,7 +91,7 @@ class mappable extends StaticAnnotation {
 
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
       def ctorArgs(mapWithValues: Term.Name): Seq[Term] = ctorParamsFirst.map { param =>
-        val propertyKey: String = CustomMappings.forMember(param.name.value)
+        val propertyKey: String = customMappings2(param)
         val nameTerm = Term.Name(param.name.value)
         val fromMapWithExpectedType = param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case tpe: Type.Name => // simple type, e.g. String
