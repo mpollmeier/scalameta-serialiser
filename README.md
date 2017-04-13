@@ -31,6 +31,7 @@ SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 * default values
 * keeps existing body of the annotated class
 * keeps existing companion object, injects the generated typeclasses
+* inject your own parameters for later use, useful when using this in a library: `@mappable(Map("param1" -> "value1"))`
 
 All of the above are covered in [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
 
