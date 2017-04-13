@@ -61,6 +61,19 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
+  @mappable case class WithNullable(someValue: String, @nullable nullableValue: String)
+  "deserialising null values" should {
+    "error by default" in {
+      val keyValues = Map("nullableValue" -> "something") // someValue not set
+      WithNullable.fromMap(keyValues) shouldBe None
+    }
+
+    "set @nullable members to Null" in {
+      val keyValues = Map("someValue" -> "something") // nullableValue not set
+      WithNullable.fromMap(keyValues) shouldBe Some(WithNullable(someValue = "something", nullableValue = null))
+    }
+  }
+
   @mappable case class WithDefaultValue(i: Int = 13, s: String)
   "case class with default" should {
     "serialise and deserialise" in {

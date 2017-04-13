@@ -25,14 +25,14 @@ SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 
 ## Features
 
-For more working examples have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
+* map class members to different names: `@mappedTo("iMapped") i: Int`
+* mark class members as nullable: `@nullable nullableValue: String`
+* Option types
+* default values
+* keeps existing body of the annotated class
+* keeps existing companion object, injects the generated typeclasses
 
-* Options
-* Default values
-* Type parameters
-* Keeps existing body of the annotated class
-* Keeps existing companion object, injects the generated typeclasses
-* mapping members to different names: `@mappedTo("iMapped") i: Int`
+All of the above are covered in [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
 
 ## Understand what's going on
 Annotating any case class with `mappable` will generate typeclass instances `FromMap` and `ToMap` that let you serialise and deserialise that specific case class. These typeclass instances end up in the companion object.

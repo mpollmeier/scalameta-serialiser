@@ -18,13 +18,11 @@ case class SerialiserException(message: String, cause: Option[Throwable] = None)
     extends RuntimeException(message, cause.orNull)
     with NoStackTrace
 
-/** Map a class member to a custom name. Usage example: 
-  *  @mappable case class WithCustomMapping(
-  *    @mappedTo("iMapped") i: Int,
-  *    @mappedTo("jMapped") j: Option[Int],
-  *                         s: String)
-  */
+/** map a class member to a custom name */
 class mappedTo(name: String) extends StaticAnnotation
+
+/** mark a class member as nullable (by default serialiser will complain and not set the value to null) */
+class nullable extends StaticAnnotation
 
 /** example usages: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
@@ -33,7 +31,7 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
 
     // defined class may or may not have a companion object
     val (classDefn: Defn.Class, compDefnOption: Option[Defn.Object]) = defn match {
-      case classDefn: Defn.Class => (classDefn, None) //only class
+      case classDefn: Defn.Class => (classDefn, None) //only class, no companion
       case Term.Block((classDefn: Defn.Class) :: (compDefn: Defn.Object) :: Nil) => (classDefn, Option(compDefn)) // class + companion
       case _ => abort(defn.pos, "Invalid annottee")
     }
@@ -61,6 +59,12 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
         case mod"@mappedTo(${Lit.String(mappedTo)})" => (param -> mappedTo)
       }
     }.flatten.toMap.withDefault(_.name.value)
+
+    val isNullable: Map[Term.Param, Boolean] = paramssFlat.map { param =>
+      param.mods.collect {
+        case mod"@nullable" => (param -> true)
+      }
+    }.flatten.toMap.withDefaultValue(false)
 
     object ToMapImpl {
       val instanceName: Term.Name = q"instance"
@@ -92,7 +96,10 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
         val nameTerm = Term.Name(param.name.value)
         val fromMapWithExpectedType = param.decltpe.getOrElse{ throw new SerialiserException(s"type for $nameTerm not defined...") } match {
           case tpe: Type.Name => // simple type, e.g. String
-            q"""$mapWithValues($propertyKey).asInstanceOf[$tpe]""" 
+            if (!isNullable(param))
+              q"""$mapWithValues($propertyKey).asInstanceOf[$tpe]"""
+            else
+              q"""$mapWithValues.get($propertyKey).map(_.asInstanceOf[$tpe]).orNull"""
           case completeTpe @ Type.Apply(Type.Name(tpeName), wrappedTpe :: Nil) if tpeName == "Option" => // Option[A]
             q"""Option($mapWithValues.get($propertyKey).orNull).asInstanceOf[$completeTpe]""" 
           case other => throw new SerialiserException(s"unable to map $other (${other.getClass})... not (yet) supported")
