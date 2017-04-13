@@ -137,18 +137,7 @@ class mappable extends StaticAnnotation {
         val customMappings: Map[String, String] = mappingsAsStrings - debugKey // debugKey is in internal detail
         (mappingsAsTerms, customMappings, debugEnabled)
       }
-
-      def validateCustomMappings(): Unit = {
-        val memberNames: Set[String] = paramssFlat.map(_.name.value).toSet
-        val mappedMembers = customMappings.keys.filterNot(_.startsWith("_"))
-        mappedMembers.foreach { key =>
-          if (!memberNames.contains(key))
-            throw new SerialiserException(s"mapped member '$key' is not a member of class '$tName'")
-        }
-      }
     }
-
-    CustomMappings.validateCustomMappings()
 
     val res = q"""
       ..$mods class $tName[..$tParams](...$paramss) extends $template
