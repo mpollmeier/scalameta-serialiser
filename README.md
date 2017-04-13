@@ -6,15 +6,16 @@ Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.
 
 ```
 libraryDependencies += "com.michaelpollmeier" %% "scalameta-serialiser" % "LATEST_VERSION"
-addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M7" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M8" cross CrossVersion.full)
 ```
 
-# Usage
+## Usage
 
-## @mappable
+Just annotate your case class with @mappable to wire in this macro. It will create a serialiser and deserialiser for the annotated class. 
 
 ```scala
-import scala.meta.serialiser.mappable
+import scala.meta.serialiser._
+
 @mappable case class SimpleCaseClass(i: Int, s: String)
 
 val testInstance = SimpleCaseClass(i = 42, s = "something")
@@ -22,10 +23,19 @@ val keyValues: Map[String, Any] = testInstance.toMap
 SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 ```
 
-For working examples have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
+## Features
+
+For more working examples have a look at [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
+
+* Options
+* Default values
+* Type parameters
+* Keeps existing body of the annotated class
+* Keeps existing companion object, injects the generated typeclasses
+* mapping members to different names: `@mappedTo("iMapped") i: Int`
 
 ## Understand what's going on
-Annotating any case class with `mappable` will generate typeclass instances `FromMap` and `ToMap` that let you serialise and deserialise that specific case class. 
+Annotating any case class with `mappable` will generate typeclass instances `FromMap` and `ToMap` that let you serialise and deserialise that specific case class. These typeclass instances end up in the companion object.
 
 ```scala
 trait ToMap[A] {
@@ -37,16 +47,22 @@ trait FromMap[A] {
 }
 ```
 
-These typeclass instances end up in the companion object.
+If you want to see what that means specifically for your class, you can turn on debug mode - this will print the generated code:
+
+```scala
+@mappable(Map("_debug" -> "true"))
+case class WithDebugEnabled(i: Int)
+```
+
 
 ## TODOs
 * [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
 * support for multiple constructor parameter lists
 * allow to switch between `null` entry and missing entry in Map when dealing with an Option type (currently maps to `null`)
 
-# sbt command to compile and test this project
+## sbt command to compile and test this project
 ;clean;examples/clean;examples/test
 
-# release a new version from sbt
+## release a new version from sbt
 * release  #will do a cross release
 * sonatypeRelease
