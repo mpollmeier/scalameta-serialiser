@@ -13,7 +13,7 @@ object TestEntities {
   object WithCompanion { def existingFun(): Int = 42 }
   @mappable case class WithCompanion (i: Int, s: String)
 
-  // /* generated code will be printed out on the console */
+  /* generated code will be printed out on the console */
   @mappable(List("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
 
@@ -22,9 +22,8 @@ object TestEntities {
     @mappedTo("jMapped") j: Option[Int],
                          s: String)
 
-  // mappings starting with `_` are treated as internal and won't be validated against members
-  @mappable(List("i" -> "iMapped", "_z" -> "internalDefinition"))
-  case class WithInternalMapping(i: Int)
+  @mappable(List("param1" -> "paramValue1"))
+  case class WithAnnotationParam(i: Int)
 }
 
 class MappableTest extends WordSpec with Matchers {
@@ -105,12 +104,10 @@ class MappableTest extends WordSpec with Matchers {
       keyValues shouldBe Map("iMapped" -> 42, "jMapped" -> 43, "s" -> "something")
       WithCustomMapping.fromMap(keyValues) shouldBe Some(testInstance)
     }
+  }
 
-    "have our custom definitions available in ToMap and FromMap" in {
-      val expectedCustomMappings = Map("i" -> "iMapped", "_z" -> "internalDefinition")
-      WithInternalMapping.fromMap.customMappings shouldBe expectedCustomMappings
-      WithInternalMapping.toMap.customMappings shouldBe expectedCustomMappings
-    }
+  "makes annotation parameters available in companion object" in {
+    WithAnnotationParam.params shouldBe Map("param1" -> "paramValue1")
   }
 
   "fromMap" should {
