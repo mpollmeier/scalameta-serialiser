@@ -3,7 +3,7 @@ val defaultScalaV = "2.12.1"
 lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
   scalaVersion := defaultScalaV,
-  crossScalaVersions := Seq("2.11.8", defaultScalaV), //prefix sbt command with `+` to run it with these scala versions
+  crossScalaVersions := Seq("2.11.10", defaultScalaV), //prefix sbt command with `+` to run it with these scala versions
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.7.0",
     "org.scalatest" %% "scalatest" % "3.0.1" % Test,
