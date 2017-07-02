@@ -1,7 +1,7 @@
 [![Build Status](https://secure.travis-ci.org/mpollmeier/scalameta-serialiser.png?branch=master)](http://travis-ci.org/mpollmeier/scalameta-serialiser)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12)
 
-# Setup with sbt
+## Setup with sbt
 Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.12.1)
 
 ```
@@ -67,3 +67,6 @@ case class WithDebugEnabled(i: Int)
 ## release a new version from sbt
 * release  #will do a cross release
 * sonatypeRelease
+
+## Talk at ScalaDays 2017 Chicago code generation with scala.meta
+[Video](https://www.youtube.com/watch?v=l88-ljjtLO0) and [slides](http://www.michaelpollmeier.com/presentations/2017-04-22-scalameta-scaladays)
