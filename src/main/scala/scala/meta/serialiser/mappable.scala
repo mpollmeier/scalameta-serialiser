@@ -143,7 +143,7 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
       ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
-        import scala.meta.serialiser.{ToMap, FromMap}
+        import scala.meta.serialiser.ToMap
 
         val defaultValueMap: Map[String, Any] = Map(..${FromMapImpl.defaultValue})
 

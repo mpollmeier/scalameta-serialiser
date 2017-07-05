@@ -1,7 +1,6 @@
 package scala.meta.serialiser
 
 import org.scalatest._
-import shapeless.test.illTyped
 
 class MappableTest extends WordSpec with Matchers {
 
