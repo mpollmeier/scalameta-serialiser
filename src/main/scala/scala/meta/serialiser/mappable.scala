@@ -143,24 +143,25 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
       ..$mods class $tName[..$tParams](...$paramss) extends $template
 
       object $typeTermName {
-        import scala.meta.serialiser.ToMap
-
-        val defaultValueMap: Map[String, Any] = Map(..${FromMapImpl.defaultValue})
+        val defaultValueMap: scala.collection.immutable.Map[String, Any] =
+          scala.collection.immutable.Map(..${FromMapImpl.defaultValue})
 
         /** parameters passed to annotation, e.g. @mappable(List("param1" -> "value1")) */
-        val params: Map[String, Any] = Map(..${AnnotationParams.paramsAsTerms})
+        val params: scala.collection.immutable.Map[String, Any] =
+          scala.collection.immutable.Map(..${AnnotationParams.paramsAsTerms})
 
         implicit def toMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
-          override def apply(${ToMapImpl.instanceName}: ${Option(tCompleteType)}): Map[String, Any] =
-            Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.instanceName)})
+          override def apply(${ToMapImpl.instanceName}: ${Option(tCompleteType)}): scala.collection.immutable.Map[String, Any] =
+            scala.collection.immutable.Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.instanceName)})
         }
 
         implicit class ToMapOps[..$tParams](instance: $tCompleteType) {
-          def toMap(implicit toMap: ToMap[$tCompleteType]): Map[String, Any] = toMap(instance)
+          def toMap(implicit toMap: scala.meta.serialiser.ToMap[$tCompleteType]): scala.collection.immutable.Map[String, Any] =
+            toMap(instance)
         }
-
+        
         implicit def fromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
-          override def apply(v: Map[String, Any]): ${Option(tCompleteTypeOption)} = {
+          override def apply(v: scala.collection.immutable.Map[String, Any]): ${Option(tCompleteTypeOption)} = {
               val values = defaultValueMap ++ v
               scala.util.Try {
                 ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorMapWithValues)})
