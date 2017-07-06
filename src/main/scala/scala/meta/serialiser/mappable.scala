@@ -33,7 +33,7 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
     val (classDefn: Defn.Class, compDefnOption: Option[Defn.Object]) = defn match {
       case classDefn: Defn.Class => (classDefn, None) //only class, no companion
       case Term.Block((classDefn: Defn.Class) :: (compDefn: Defn.Object) :: Nil) => (classDefn, Option(compDefn)) // class + companion
-      case _ => abort(defn.pos, "Invalid annottee")
+      case _ => abort(defn.pos, "Invalid annottee - you can only use @mappable on case classes")
     }
 
     // get existing companion object statements (if any)

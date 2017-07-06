@@ -3,7 +3,6 @@ package scala.meta.serialiser
 import org.scalatest._
 
 class MappableTest extends WordSpec with Matchers {
-
   @mappable case class SimpleCaseClass(i: Int, s: String)
   "simple case class" should {
     "serialise and deserialise" in {
