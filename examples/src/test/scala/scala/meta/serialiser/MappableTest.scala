@@ -72,21 +72,21 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
-  @mappable case class WithDefaultValue(i: Int = 13, s: String)
+  @mappable case class WithDefaultValue(i: Int = 13, s: Option[String] = Some("value"), t: String)
   "case class with default" should {
     "serialise and deserialise" in {
-      val testInstance = WithDefaultValue(s = "something")
+      val testInstance = WithDefaultValue(t = "something")
       val keyValue = testInstance.toMap
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
 
     "store correct defaultValueMap" in {
-      WithDefaultValue.defaultValueMap shouldBe (Map[String, Any]("i" -> 13))
+      WithDefaultValue.defaultValueMap shouldBe Map[String, Any]("i" -> 13, "s" -> "value")
     }
 
-    "keep default value in fromMap" in {
-      val testInstance = WithDefaultValue(s = "something") // with default i = 13
-      val keyValue = Map[String, Any]("s" -> "something")
+    "use default values in fromMap" in {
+      val testInstance = WithDefaultValue(t = "something")
+      val keyValue = Map[String, Any]("t" -> "something")
       WithDefaultValue.fromMap(keyValue) shouldBe Some(testInstance)
     }
   }
@@ -125,7 +125,23 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
-  /* generated code will be printed out on the console */
+  // generated code will be printed out on the console
   @mappable(Map("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
+
+  // @mappable(Map("_debug" -> "true"))
+  @mappable
+  case class CombiningAllFeatures[A](
+    i: Option[Int] = Some(42),
+    @mappedTo("aMapped") a: A,
+    @nullable s: String) {
+    def banana = i.get
+  }
+
+  "combining all features" in {
+    CombiningAllFeatures(a = true, s = "bar").toMap shouldBe Map("i" -> 42, "aMapped" -> true, "s" -> "bar")
+
+    CombiningAllFeatures.fromMap(Map("i" -> 42, "aMapped" -> true, "s" -> "bar")).get shouldBe CombiningAllFeatures(Some(42), true, "bar")
+    CombiningAllFeatures.fromMap(Map("aMapped" -> true)).get shouldBe CombiningAllFeatures(Some(42), true, null)
+  }
 }

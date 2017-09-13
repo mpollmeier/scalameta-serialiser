@@ -84,10 +84,19 @@ class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
     object FromMapImpl {
       val ctorMapWithValues: Term.Name = q"values"
 
-      // get default value and store those value as a map in object
-      val defaultValue:  Seq[Term.ApplyInfix] = paramssFlat collect {
+      // default values from constructor, will be stored as a Map in the companion object
+      val defaultValue: Seq[Term.ApplyInfix] = paramssFlat collect {
         case param if param.default.nonEmpty =>
-          q"""${param.name.value} -> ${param.default.get}"""
+          val key = param.name.value
+          val value = param.default.get
+
+          val isOption = param.decltpe.collect {// decltpe => 
+            case typeApply: Type.Apply if typeApply.tpe.isInstanceOf[Type.Name] => 
+              typeApply.tpe.asInstanceOf[Type.Name].value == "Option"
+          }.getOrElse(false)
+
+          if (isOption) q"""$key -> $value.get"""
+          else q"""$key -> $value"""
       }
 
       val ctorParamsFirst: Seq[Term.Param] = paramss.headOption.getOrElse(Nil)
