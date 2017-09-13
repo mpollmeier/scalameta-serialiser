@@ -1,4 +1,4 @@
-val defaultScalaV = "2.12.2"
+val defaultScalaV = "2.12.3"
 
 lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
@@ -9,11 +9,8 @@ lazy val commonSettings = Seq(
     "org.scalatest" %% "scalatest" % "3.0.3" % Test,
     "com.chuusai" %% "shapeless" % "2.3.2" % Test
   ),
-  // A dependency on macro paradise 3.x is required to both write and expand
-  // new-style macros.  This is similar to how it works for old-style macro
-  // annotations and a dependency on macro paradise 2.x.
-  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M9" cross CrossVersion.full),
-  scalacOptions ++= Seq("-Xlint", "-deprecation", "-feature"),
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full),
+  scalacOptions ++= Seq("-Xplugin-require:macroparadise", "-Xlint", "-deprecation", "-feature"),
   licenses +=("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://github.com/mpollmeier/scalameta-serialiser"))
 )
