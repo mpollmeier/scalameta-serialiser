@@ -2,11 +2,11 @@
 [![Scaladex](https://index.scala-lang.org/mpollmeier/scalameta-serialiser/scalameta-serialiser/latest.svg)](https://index.scala-lang.org/mpollmeier/scalameta-serialiser/scalameta-serialiser/)
 
 ## Setup with sbt
-Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.12.1)
+Get the latest version of [scalameta-serialiser](https://maven-badges.herokuapp.com/maven-central/com.michaelpollmeier/scalameta-serialiser_2.12) and the [scalameta compiler plugin](https://maven-badges.herokuapp.com/maven-central/org.scalameta/paradise_2.12.3)
 
 ```
 libraryDependencies += "com.michaelpollmeier" %% "scalameta-serialiser" % "LATEST_VERSION"
-addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M8" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M10" cross CrossVersion.full)
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ case class WithDebugEnabled(i: Int)
 
 ## release a new version from sbt
 * release  #will do a cross release
-* sonatypeRelease
+* sonatypeReleaseAll
 
 ## Talk at ScalaDays 2017 Chicago code generation with scala.meta
 [Video](https://www.youtube.com/watch?v=l88-ljjtLO0) and [slides](http://www.michaelpollmeier.com/presentations/2017-04-22-scalameta-scaladays)
