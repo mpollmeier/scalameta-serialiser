@@ -2,6 +2,8 @@ lazy val commonSettings = Seq(
   organization := "com.michaelpollmeier",
   scalaVersion := "2.12.3",
   crossScalaVersions := Seq("2.11.11"), //prefix sbt command with `+` to run it with these scala versions
+  releaseCrossBuild := true,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "1.8.0",
     "org.scalatest" %% "scalatest" % "3.0.3" % Test,
@@ -20,8 +22,6 @@ lazy val examples = project.in(file("examples"))
   .settings(commonSettings: _*)
   .dependsOn(`scalameta-serialiser`)
 
-releaseCrossBuild := true
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
 publishTo := {
   val sonatype = "https://oss.sonatype.org/"
   if (isSnapshot.value)
