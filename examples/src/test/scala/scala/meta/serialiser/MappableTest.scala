@@ -106,8 +106,11 @@ class MappableTest extends WordSpec with Matchers {
 
   @mappable(Map("param1" -> "paramValue1"))
   case class WithAnnotationParam(i: Int)
-  "makes annotation parameters available in companion object" in {
-    WithAnnotationParam.params shouldBe Map("param1" -> "paramValue1")
+  "makes annotation parameters available in companion object and typeclass instances" in {
+    val annotationParams = Map("param1" -> "paramValue1")
+    WithAnnotationParam.annotationParams shouldBe annotationParams
+    implicitly[ToMap[WithAnnotationParam]].annotationParams shouldBe annotationParams
+    implicitly[FromMap[WithAnnotationParam]].annotationParams shouldBe annotationParams
   }
 
   "fromMap" should {

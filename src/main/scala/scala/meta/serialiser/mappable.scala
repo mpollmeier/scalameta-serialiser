@@ -9,9 +9,15 @@ import scala.util.control.NoStackTrace
 // type classes that @mappable will generate for annotated classes
 trait ToMap[A] {
   def apply(a: A): Map[String, Any]
+
+  /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
+  def annotationParams: Map[String, Any] = Map.empty
 }
 trait FromMap[A] {
   def apply(keyValues: Map[String, Any]): Option[A]
+
+  /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
+  def annotationParams: Map[String, Any] = Map.empty
 }
 
 case class SerialiserException(message: String, cause: Option[Throwable] = None)
@@ -155,13 +161,17 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
         val defaultValueMap: scala.collection.immutable.Map[String, Any] =
           scala.collection.immutable.Map(..${FromMapImpl.defaultValue})
 
-        /** parameters passed to annotation, e.g. @mappable(List("param1" -> "value1")) */
-        val params: scala.collection.immutable.Map[String, Any] =
+        /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
+        val annotationParams: scala.collection.immutable.Map[String, Any] =
           scala.collection.immutable.Map(..${AnnotationParams.paramsAsTerms})
 
         implicit def toMap[..$tParams] = new scala.meta.serialiser.ToMap[$tCompleteType] {
           override def apply(${ToMapImpl.instanceName}: ${Option(tCompleteType)}): scala.collection.immutable.Map[String, Any] =
             scala.collection.immutable.Map[String, Any](..${ToMapImpl.keyValues(ToMapImpl.instanceName)})
+
+          /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
+          override val annotationParams: scala.collection.immutable.Map[String, Any] =
+            scala.collection.immutable.Map(..${AnnotationParams.paramsAsTerms})
         }
 
         implicit class ToMapOps[..$tParams](instance: $tCompleteType) {
@@ -176,6 +186,10 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
                 ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorMapWithValues)})
               }.toOption
             }
+
+          /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
+          override val annotationParams: scala.collection.immutable.Map[String, Any] =
+            scala.collection.immutable.Map(..${AnnotationParams.paramsAsTerms})
         }
 
         ..$compStats
