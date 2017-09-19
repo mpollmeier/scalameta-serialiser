@@ -26,7 +26,7 @@ class nullable extends StaticAnnotation
 
 /** example usages: see MappableTest.scala */
 @compileTimeOnly("@scala.meta.serialiser.mappable not expanded")
-class mappable(annotationParams: Map[String, Any]) extends StaticAnnotation {
+class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
 
     // defined class may or may not have a companion object
