@@ -131,9 +131,10 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
       * pass arguments to the macro annotation */
       val (debugEnabled: Boolean, paramsAsTerms: Seq[Term]) = {
         def illegalDefinition(unsupported: Tree) = throw new SerialiserException(
-          "illegal definition of @mappable annotation. Valid examples are e.g.:" +
-          " `@mappable` and `@mappable(List(\"param1\" -> \"value1\")`. See MappableTest.scala for more examples. " +
-          s"Unsupported Tree: $unsupported of type ${unsupported.getClass}")
+          "illegal definition of @mappable annotation. Valid examples are e.g.: " +
+          "`@mappable` and `@mappable(Map(\"_debug\" -> \"true\", \"param1\" -> \"value1\"))`. " +
+          s"Unsupported Tree: $unsupported of type ${unsupported.getClass}" + 
+          "\nSee https://github.com/mpollmeier/scalameta-serialiser/blob/master/examples/src/test/scala/scala/meta/serialiser/MappableTest.scala for more examples. ")
 
         val params: Seq[(Lit, Lit)] = this match {
           case q"new $_()" => Nil // no params defined
