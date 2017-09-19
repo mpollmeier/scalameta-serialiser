@@ -76,21 +76,25 @@ class MappableTest extends WordSpec with Matchers {
     }
   }
 
-  @mappable case class WithDefaultValue(i: Int = 13, s: Option[String] = Some("value"), t: String)
-  "case class with default" should {
+  @mappable case class WithDefaultValue(
+    i: Int = 13,
+    s: Option[String] = Some("value"),
+    t: Option[String] = None,
+    q: String)
+  "case class with default values" should {
     "serialise and deserialise" in {
-      val testInstance = WithDefaultValue(t = "something")
+      val testInstance = WithDefaultValue(q = "something")
       val keyValue = testInstance.toMap
       WithDefaultValue.fromMap(keyValue) shouldBe Success(testInstance)
     }
 
     "store correct defaultValueMap" in {
-      WithDefaultValue.defaultValueMap shouldBe Map[String, Any]("i" -> 13, "s" -> "value")
+      WithDefaultValue.defaultValueMap shouldBe Map[String, Any]("i" -> 13, "s" -> "value", "t" -> null)
     }
 
     "use default values in fromMap" in {
-      val testInstance = WithDefaultValue(t = "something")
-      val keyValue = Map[String, Any]("t" -> "something")
+      val testInstance = WithDefaultValue(q = "something")
+      val keyValue = Map[String, Any]("q" -> "something")
       WithDefaultValue.fromMap(keyValue) shouldBe Success(testInstance)
     }
   }

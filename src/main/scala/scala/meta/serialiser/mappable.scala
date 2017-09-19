@@ -92,7 +92,7 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
       val ctorMapWithValues: Term.Name = q"values"
 
       // default values from constructor, will be stored as a Map in the companion object
-      val defaultValue: Seq[Term.ApplyInfix] = paramssFlat collect {
+      val defaultValues: Seq[Term.ApplyInfix] = paramssFlat collect {
         case param if param.default.nonEmpty =>
           val key = param.name.value
           val value = param.default.get
@@ -102,7 +102,7 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
               typeApply.tpe.asInstanceOf[Type.Name].value == "Option"
           }.getOrElse(false)
 
-          if (isOption) q"""$key -> $value.get"""
+          if (isOption) q"""$key -> $value.getOrElse(null)"""
           else q"""$key -> $value"""
       }
 
@@ -161,7 +161,7 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
 
       object $typeTermName {
         val defaultValueMap: scala.collection.immutable.Map[String, Any] =
-          scala.collection.immutable.Map(..${FromMapImpl.defaultValue})
+          scala.collection.immutable.Map(..${FromMapImpl.defaultValues})
 
         /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
         val annotationParams: scala.collection.immutable.Map[String, Any] =
