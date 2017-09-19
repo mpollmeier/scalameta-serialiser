@@ -136,7 +136,6 @@ class MappableTest extends WordSpec with Matchers {
   @mappable(Map("_debug" -> "true"))
   case class WithDebugEnabled(i: Int)
 
-  // @mappable(Map("_debug" -> "true"))
   @mappable
   case class CombiningAllFeatures[A](
     i: Option[Int] = Some(42),
