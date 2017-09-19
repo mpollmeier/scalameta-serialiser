@@ -5,6 +5,7 @@ import scala.annotation.StaticAnnotation
 import scala.collection.immutable.Seq
 import scala.meta._
 import scala.util.control.NoStackTrace
+import scala.util.Try
 
 // type classes that @mappable will generate for annotated classes
 trait ToMap[A] {
@@ -13,8 +14,9 @@ trait ToMap[A] {
   /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
   def annotationParams: Map[String, Any] = Map.empty
 }
+
 trait FromMap[A] {
-  def apply(keyValues: Map[String, Any]): Option[A]
+  def apply(keyValues: Map[String, Any]): Try[A]
 
   /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
   def annotationParams: Map[String, Any] = Map.empty
@@ -58,7 +60,6 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
       if (tParamTypes.isEmpty) q"$typeTermName"
       else q"$typeTermName[..$tParamTypes]"
     val tCompleteType: Type = Helpers.toType(tCompleteTerm)
-    val tCompleteTypeOption: Type = Helpers.toType(q"Option[$tCompleteType]")
 
     val customMappings: Map[Term.Param, String] = paramssFlat.map { param =>
       param.mods.collect {
@@ -180,11 +181,11 @@ class mappable(annotationParams: Map[String, Any] = Map.empty) extends StaticAnn
         }
         
         implicit def fromMap[..$tParams] = new scala.meta.serialiser.FromMap[$tCompleteType] {
-          override def apply(v: scala.collection.immutable.Map[String, Any]): ${Option(tCompleteTypeOption)} = {
+          override def apply(v: scala.collection.immutable.Map[String, Any]) = {
               val values = defaultValueMap ++ v
               scala.util.Try {
                 ${tCompleteTerm}(..${FromMapImpl.ctorArgs(FromMapImpl.ctorMapWithValues)})
-              }.toOption
+              }
             }
 
           /** parameters passed to annotation, e.g. @mappable(Map("param1" -> "value1")) */
