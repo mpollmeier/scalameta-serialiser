@@ -20,7 +20,7 @@ import scala.meta.serialiser._
 
 val testInstance = SimpleCaseClass(i = 42, s = "something")
 val keyValues: Map[String, Any] = testInstance.toMap
-SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
+SimpleCaseClass.fromMap(keyValues) // result: Success(testInstance)
 ```
 
 ## Features
@@ -31,7 +31,7 @@ SimpleCaseClass.fromMap(keyValues) // result: Some(testInstance)
 * default values
 * keeps existing body of the annotated class
 * keeps existing companion object, injects the generated typeclasses
-* inject your own parameters for later use, useful when using this in a library: `@mappable(Map("param1" -> "value1"))`
+* inject your own config for later use, useful when using this in a library: `@mappable(Map("param1" -> "value1"))` -> you can lookup the entries of that Map at runtime in the companion and the generated typeclass instances. 
 
 All of the above are covered in [MappableTest.scala](examples/src/test/scala/scala/meta/serialiser/MappableTest.scala).
 
@@ -41,14 +41,16 @@ Annotating any case class with `mappable` will generate typeclass instances `Fro
 ```scala
 trait ToMap[A] {
   def apply(a: A): Map[String, Any]
+  def annotationParams: Map[String, Any] = Map.empty
 }
 
 trait FromMap[A] {
-  def apply(keyValues: Map[String, Any]): Option[A]
+  def apply(keyValues: Map[String, Any]): Try[A]
+  def annotationParams: Map[String, Any] = Map.empty
 }
 ```
 
-If you want to see what that means specifically for your class, you can turn on debug mode - this will print the generated code:
+If you want to see the generated code, simply turn on debug mode:
 
 ```scala
 @mappable(Map("_debug" -> "true"))
