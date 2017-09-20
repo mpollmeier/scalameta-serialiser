@@ -57,8 +57,12 @@ If you want to see the generated code, simply turn on debug mode:
 case class WithDebugEnabled(i: Int)
 ```
 
-
 ## TODOs
+* smart matching for property name if there's no direct match
+  * different casing
+  * camelCase
+  * snake_case_
+  * only take the smart match if there's one option. if it's ambiguous: fail
 * [get maps of specific types](https://github.com/mpollmeier/scalameta-serialiser/issues/1)
 * support for multiple constructor parameter lists
 * allow to switch between `null` entry and missing entry in Map when dealing with an Option type (currently maps to `null`)
